@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><title>Cadastrar Usuário</title></head>
+<body>
+  <h1>Cadastrar Usuário</h1>
+  <form method="POST" action="/auth/cadastro">
+    <input name="nome" placeholder="Nome" required><br>
+    <input name="email" type="email" placeholder="E-mail" required><br>
+    <input name="senha" type="password" placeholder="Senha" required><br>
+    <select name="nivel" required>
+      <option value="">Selecione o nível</option>
+      <option value="admin">Administrador</option>
+      <option value="comum">Comum</option>
+    </select><br>
+    <button type="submit">Cadastrar</button>
+  </form>
+  <a href="/auth/login">Voltar para login</a>
+</body>
+</html>

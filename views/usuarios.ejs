@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><title>Usuários</title></head>
+<body>
+  <h1>Usuários</h1>
+  <a href="/auth/cadastro">Novo Usuário</a>
+  <ul>
+    <% usuarios.forEach(u => { %>
+      <li>
+        <%= u.nome %> - <%= u.email %> - <%= u.nivel %> - <%= u.status ? "Ativo" : "Inativo" %>
+        <a href="/usuarios/editar/<%= u.id %>"><button type="submit">Editar</button></a>
+         <a href="/usuarios/senha/<%= u.id %>"><button type="submit">Atualizar Senha</button></a>
+        <% if (u.status) { %>
+          <form method="POST" action="/usuarios/inativar/<%= u.id %>" style="display:inline;">
+            <button type="submit">Inativar</button>
+          </form>
+        <% } else { %>
+          <form method="POST" action="/usuarios/ativar/<%= u.id %>" style="display:inline;">
+            <button type="submit">Ativar</button>
+          </form>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+</body>
+</html>

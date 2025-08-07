@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head><title>Registrar Jornada</title></head>
+<body>
+  <h1>Registrar Jornada</h1>
+  <form method="POST" action="/jornada/registrar">
+    <label for="id_funcionario">Funcionário:</label>
+    <select name="id_funcionario" id="id_funcionario" required>
+      <% funcionarios.forEach(f => { %>
+        <option value="<%= f.id %>"><%= f.nome %></option>
+      <% }) %>
+    </select><br>
+
+    <label for="data">Data:</label>
+    <input name="data" type="date" required><br>
+
+    <label for="entrada">Entrada:</label>
+    <input name="entrada" type="time" required><br>
+
+    <div id="intervalos">
+      <label for="saida_intervalo">Saída para Intervalo:</label>
+      <input name="saida_intervalo" type="time"><br>
+
+      <label for="retorno_intervalo">Retorno do Intervalo:</label>
+      <input name="retorno_intervalo" type="time"><br>
+    </div>
+
+    <label for="saida">Saída:</label>
+    <input name="saida" type="time" required><br>
+
+    <button type="submit">Registrar Jornada</button>
+  </form>
+
+  <a href="/">Voltar</a>
+</body>
+</html>

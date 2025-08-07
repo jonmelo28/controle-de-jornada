@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Jornada</title>
+    <style>
+        table, th, td {
+            border: 1px solid #000;
+            border-collapse: collapse;
+            padding: 5px;
+            text-align: center;
+        }
+        th {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Relatório de Jornada</h1>
+
+    <!-- Filtros -->
+    <form method="GET" action="/jornada/relatorio_avancado">
+        <label>Funcionário:</label>
+        <select name="id_funcionario" required>
+            <option value="">Selecione</option>
+            <% funcionarios.forEach(f => { %>
+                <option value="<%= f.id %>" 
+                    <%= filtros && filtros.id_funcionario == f.id ? 'selected' : '' %>>
+                    <%= f.nome %>
+                </option>
+            <% }) %>
+        </select>
+
+        <label>De:</label>
+        <input type="date" name="data_inicio" required value="<%= filtros ? filtros.data_inicio : '' %>">
+
+        <label>Até:</label>
+        <input type="date" name="data_fim" required value="<%= filtros ? filtros.data_fim : '' %>">
+
+        <button type="submit">Gerar Relatório</button>
+    </form>
+
+    <% if (relatorio.length > 0) { %>
+
+    <h2>Funcionário: <%= funcionario.nome %></h2>
+    <h3>Período: <%= data_inicio %> até <%= data_fim %></h3>
+
+    <!-- Tabela do Relatório -->
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Dia</th>
+                <th>Entrada</th>
+                <th>Saída Intervalo</th>
+                <th>Retorno Intervalo</th>
+                <th>Saída</th>
+                <th>Horas Trabalhadas</th>
+                <th>Horas Extras</th>
+                <th>Horas Restantes</th>
+                <th>Folga Manhã</th>
+                <th>Folga Tarde</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% relatorio.forEach(r => { %>
+                <tr>
+                    <td><%= r.data %></td>
+                    <td><%= r.dia %></td>
+                    <td><%= r.entrada || '-' %></td>
+                    <td><%= r.saida_intervalo || '-' %></td>
+                    <td><%= r.retorno_intervalo || '-' %></td>
+                    <td><%= r.saida || '-' %></td>
+                    <td><%= r.horas_trabalhadas || '-' %></td>
+                    <td><%= r.horas_extras || '-' %></td>
+                    <td><%= r.horas_restantes || '-' %></td>
+                    <td><%= r.folga_primeiro_periodo === 'S' ? '✔️' : '' %></td>
+                    <td><%= r.folga_segundo_periodo === 'S' ? '✔️' : '' %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+    <!-- Resumo -->
+    <h3>Resumo Geral</h3>
+    <table>
+        <tr>
+            <th>Horas Trabalhadas</th>
+            <td><%= resumo.total_trabalhadas %></td>
+        </tr>
+        <tr>
+            <th>Horas Extras</th>
+            <td><%= resumo.total_extras %></td>
+        </tr>
+        <tr>
+            <th>Horas Restantes</th>
+            <td><%= resumo.total_restantes %></td>
+        </tr>
+        <tr>
+            <th>Saldo</th>
+            <td><%= resumo.saldo %></td>
+        </tr>
+          <tr>
+            <th>Salário Base</th>
+            <td>R$ <%= resumo.salario_base %></td>
+        </tr>
+        <tr>
+            <th>Valor Hora</th>
+            <td>R$ <%= resumo.valor_hora %></td>
+        </tr>
+        <tr>
+            <th>Valor Hora Extra</th>
+            <td>R$ <%= resumo.valor_hora_extra %></td>
+        </tr>
+        <tr>
+            <th>Valor de Horas Extras</th>
+            <td>R$ <%= resumo.valor_horas_extras_rs %></td>
+        </tr>
+        <tr>
+            <th>DSR sobre Extras</th>
+            <td>R$ <%= resumo.dsr %></td>
+        </tr>
+    </table>
+
+    <!-- Botões para exportação -->
+    <br>
+    <form method="GET" action="/jornada/exportar_excel">
+        <input type="hidden" name="id_funcionario" value="<%= filtros.id_funcionario %>">
+        <input type="hidden" name="data_inicio" value="<%= filtros.data_inicio %>">
+        <input type="hidden" name="data_fim" value="<%= filtros.data_fim %>">
+        <button type="submit">Exportar Excel</button>
+    </form>
+
+    <form method="GET" action="/jornada/exportar_pdf">
+        <input type="hidden" name="id_funcionario" value="<%= filtros.id_funcionario %>">
+        <input type="hidden" name="data_inicio" value="<%= filtros.data_inicio %>">
+        <input type="hidden" name="data_fim" value="<%= filtros.data_fim %>">
+        <button type="submit">Exportar PDF</button>
+    </form>
+
+    <% } else { %>
+        <p><strong>Selecione um funcionário e um período para gerar o relatório.</strong></p>
+    <% } %>
+
+</body>
+</html>

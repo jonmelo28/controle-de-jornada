@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title><%= folga ? 'Editar Folga' : 'Cadastrar Folga' %></title>
+</head>
+<body>
+  <h1><%= folga ? 'Editar Folga' : 'Cadastrar Folga' %></h1>
+
+  <form method="POST" action="<%= folga ? '/folgas/editar/' + folga.id : '/folgas/cadastrar' %>">
+    <label>Funcionário:</label>
+    <select name="id_funcionario" required>
+      <% funcionarios.forEach(f => { %>
+        <option value="<%= f.id %>" <%= folga && folga.id_funcionario === f.id ? 'selected' : '' %>>
+          <%= f.nome %>
+        </option>
+      <% }) %>
+    </select><br><br>
+
+    <label>Data:</label>
+    <input type="date" name="data" value="<%= folga ? folga.data.toISOString().split('T')[0] : '' %>" required><br><br>
+
+    <label>
+      <input type="checkbox" name="folga_primeiro_periodo" <%= folga && folga.folga_primeiro_periodo === 'S' ? 'checked' : '' %> >
+      Folga Primeiro Período
+    </label><br>
+
+    <label>
+      <input type="checkbox" name="folga_segundo_periodo" <%= folga && folga.folga_segundo_periodo === 'S' ? 'checked' : '' %> >
+      Folga Segundo Período
+    </label><br><br>
+
+    <button type="submit"><%= folga ? 'Atualizar' : 'Cadastrar' %></button>
+  </form>
+
+  <br>
+  <a href="/folgas/listar">Voltar</a>
+</body>
+</html>

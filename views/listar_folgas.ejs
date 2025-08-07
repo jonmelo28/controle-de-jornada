@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Listar Folgas</title>
+</head>
+<body>
+  <h1>Folgas Cadastradas</h1>
+
+  <table border="1">
+    <tr>
+      <th>ID</th>
+      <th>Funcionário</th>
+      <th>Data</th>
+      <th>Folga Primeiro Período</th>
+      <th>Folga Segundo Período</th>
+      <th>Ações</th>
+    </tr>
+
+    <% folgas.forEach(f => { %>
+      <tr>
+        <td><%= f.id %></td>
+        <td><%= f.nome_funcionario %></td>
+        <td><%= f.data.toISOString().split('T')[0] %></td>
+        <td><%= f.folga_primeiro_periodo === 'S' ? 'Sim' : 'Não' %></td>
+        <td><%= f.folga_segundo_periodo === 'S' ? 'Sim' : 'Não' %></td>
+        <td>
+          <a href="/folgas/editar/<%= f.id %>">Editar</a> |
+          <form action="/folgas/excluir/<%= f.id %>" method="POST" style="display:inline;">
+            <button type="submit" onclick="return confirm('Deseja excluir?')">Excluir</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+
+  <br>
+  <a href="/folgas/cadastrar">Cadastrar Nova Folga</a>
+</body>
+</html>

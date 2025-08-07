@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><title>Atualizar Senha</title></head>
+<body>
+  <h1>Atualizar Senha do Usuário</h1>
+  <form method="POST" action="/usuarios/senha/<%= usuario.id %>">
+    <input name="novaSenha" type="password" placeholder="Nova senha" required><br>
+    <button type="submit">Atualizar Senha</button>
+  </form>
+  <a href="/usuarios">Voltar</a>
+</body>
+</html>

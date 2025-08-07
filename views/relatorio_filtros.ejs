@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><title>Relatório por Período</title></head>
+<body>
+  <h1>Filtrar Relatório</h1>
+ <form method="GET" action="/jornada/relatorio_avancado">
+  <label>Funcionário:</label>
+<select name="id_funcionario" required>
+  <option value="">Selecione um funcionário</option>
+  <% funcionarios.forEach(f => { %>
+    <option value="<%= f.id %>" 
+      <%= filtros && filtros.id_funcionario == f.id ? 'selected' : '' %>>
+      <%= f.nome %>
+    </option>
+  <% }) %>
+</select><br>
+
+  <label>De:</label>
+  <input type="date" name="data_inicio" required value="<%= filtros ? filtros.data_inicio : '' %>"><br>
+
+  <label>Até:</label>
+  <input type="date" name="data_fim" required value="<%= filtros ? filtros.data_fim : '' %>"><br>
+
+  <button type="submit">Gerar Relatório</button>
+</form>
+</body>
+</html>

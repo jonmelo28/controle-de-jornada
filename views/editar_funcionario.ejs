@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>Editar Funcionário</title></head>
+<body>
+  <h1>Editar Funcionário</h1>
+  <form method="POST" action="/funcionarios/editar/<%= funcionario.id %>">
+    <input name="nome" value="<%= funcionario.nome %>" placeholder="Nome" required><br>
+    <input name="email" value="<%= funcionario.email %>" placeholder="Email" required><br>
+    <input name="cargo" value="<%= funcionario.cargo %>" placeholder="Cargo" required><br>
+    <input name="jornada_base" value="<%= funcionario.jornada_base %>" placeholder="Jornada Base (horas)" required><br>
+    <input name="salario" value="<%= funcionario.salario %>" placeholder="Salário" required><br>
+    <button type="submit">Atualizar</button>
+  </form>
+  <a href="/funcionarios">Voltar</a>
+</body>
+</html>

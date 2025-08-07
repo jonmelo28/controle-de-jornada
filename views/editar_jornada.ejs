@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>Editar Jornada</title></head>
+<body>
+  <h1>Editar Jornada - <%= jornada.nome_funcionario %></h1>
+  <form method="POST" action="/jornada/editar/<%= jornada.id %>">
+    <label>Entrada:</label>
+    <input type="time" name="entrada" value="<%= jornada.entrada %>" required><br>
+
+    <label>Saída Intervalo:</label>
+    <input type="time" name="saida_intervalo" value="<%= jornada.saida_intervalo %>"><br>
+
+    <label>Retorno Intervalo:</label>
+    <input type="time" name="retorno_intervalo" value="<%= jornada.retorno_intervalo %>"><br>
+
+    <label>Saída:</label>
+    <input type="time" name="saida" value="<%= jornada.saida %>" required><br>
+
+    <button type="submit">Salvar Alterações</button>
+  </form>
+  <a href="/jornada/relatorio">Voltar</a>
+</body>
+</html>

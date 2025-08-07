@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head><title>Cadastrar Horário</title></head>
+<body>
+  <h1>Cadastrar Horário Padrão</h1>
+  <form method="POST" action="/horarios/novo">
+    <input name="descricao" placeholder="Descrição" required><br>
+    <label for="dia_da_semana">Dia da Semana:</label>
+    <select name="dia_da_semana" id="dia_da_semana" required onchange="ajustarCampos()">
+      <option value="segunda">Segunda</option>
+      <option value="terca">Terça</option>
+      <option value="quarta">Quarta</option>
+      <option value="quinta">Quinta</option>
+      <option value="sexta">Sexta</option>
+      <option value="sabado">Sábado</option>
+    </select><br>
+    <input name="entrada" type="time" required><br>
+    <input name="saida_intervalo" type="time" required><br>
+    <input name="retorno_intervalo" type="time" required><br>
+    <input name="saida" type="time" required><br>
+    <button type="submit">Cadastrar</button>
+  </form>
+
+ <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const diaSelect = document.getElementById('dia_da_semana');
+    const intervalos = document.getElementById('intervalos');
+    const saidaIntervalo = document.querySelector('input[name="saida_intervalo"]');
+    const retornoIntervalo = document.querySelector('input[name="retorno_intervalo"]');
+
+    function ajustarCampos() {
+      if (diaSelect.value === 'sabado') {
+        intervalos.style.display = 'none';
+        saidaIntervalo.removeAttribute('required');
+        retornoIntervalo.removeAttribute('required');
+      } else {
+        intervalos.style.display = 'block';
+        saidaIntervalo.setAttribute('required', 'required');
+        retornoIntervalo.setAttribute('required', 'required');
+      }
+    }
+
+    // Evento para mudança de seleção
+    diaSelect.addEventListener('change', ajustarCampos);
+
+    // Inicializar no carregamento
+    ajustarCampos();
+  });
+</script>
+
+
+  <a href="/horarios">Voltar</a>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head><title>Editar Horário</title></head>
+<body>
+  <h1>Editar Horário Padrão</h1>
+  <form method="POST" action="/horarios/editar/<%= horario.id %>">
+    <input name="descricao" value="<%= horario.descricao %>" required><br>
+
+    <label for="dia_da_semana">Dia da Semana:</label>
+    <select name="dia_da_semana" id="dia_da_semana" required onchange="ajustarCampos()">
+      <option value="segunda" <%= horario.dia_da_semana === 'segunda' ? 'selected' : '' %>>Segunda</option>
+      <option value="terca" <%= horario.dia_da_semana === 'terca' ? 'selected' : '' %>>Terça</option>
+      <option value="quarta" <%= horario.dia_da_semana === 'quarta' ? 'selected' : '' %>>Quarta</option>
+      <option value="quinta" <%= horario.dia_da_semana === 'quinta' ? 'selected' : '' %>>Quinta</option>
+      <option value="sexta" <%= horario.dia_da_semana === 'sexta' ? 'selected' : '' %>>Sexta</option>
+      <option value="sabado" <%= horario.dia_da_semana === 'sabado' ? 'selected' : '' %>>Sábado</option>
+    </select><br>
+
+    <input name="entrada" type="time" value="<%= horario.entrada %>" required><br>
+    <div id="intervalos">
+      <input name="saida_intervalo" type="time" value="<%= horario.saida_intervalo %>" placeholder="Saída Intervalo"><br>
+      <input name="retorno_intervalo" type="time" value="<%= horario.retorno_intervalo %>" placeholder="Retorno Intervalo"><br>
+    </div>
+    <input name="saida" type="time" value="<%= horario.saida %>" required><br>
+
+    <button type="submit">Atualizar</button>
+  </form>
+
+  <script>
+  function ajustarCampos() {
+    const dia = document.getElementById('dia_da_semana').value;
+    const intervalos = document.getElementById('intervalos');
+    const saidaIntervalo = document.querySelector('input[name="saida_intervalo"]');
+    const retornoIntervalo = document.querySelector('input[name="retorno_intervalo"]');
+
+    if (dia === 'sabado') {
+      intervalos.style.display = 'none';
+      saidaIntervalo.required = false;
+      retornoIntervalo.required = false;
+    } else {
+      intervalos.style.display = 'block';
+      saidaIntervalo.required = true;
+      retornoIntervalo.required = true;
+    }
+  }
+
+  ajustarCampos(); // Inicializa no carregamento
+</script>
+
+  <a href="/horarios">Voltar</a>
+</body>
+</html>

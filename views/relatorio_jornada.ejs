@@ -1,0 +1,19 @@
+
+<!DOCTYPE html>
+<html>
+<head><title>Relatório Jornada</title></head>
+<body>
+  <h1>Relatório Jornada</h1>
+  <a href="/jornada/registrar">nova jornada</a>
+  <ul>
+    <% jornadas.forEach(j => { %>
+      <li><%= j.data %> - <%= j.nome_funcionario%> - <%= j.entrada %> - <%= j.saida_intervalo %> - <%= j.retorno_intervalo %> - <%= j.saida %>
+      <a href="/jornada/editar/<%= j.id %>">Editar</a>
+      <form method="POST" action="/jornada/apagar/<%= j.id %>" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir?')">
+        <button type="submit">Apagar</button>
+      </form>
+      </li>
+    <% }) %>
+  </ul>
+</body>
+</html>

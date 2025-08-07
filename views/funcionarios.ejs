@@ -1,0 +1,25 @@
+
+<!DOCTYPE html>
+<html>
+<head><title>Funcionários</title></head>
+<body>
+  <h1>Funcionários</h1>
+  <a href="/funcionarios/novo">Novo Funcionário</a>
+  <ul>
+    <% funcionarios.forEach(f => { %>
+      <li><%= f.nome %> - <%= f.cargo %> - <%= f.status ? "Ativo" : "Inativo" %>
+          <a href="/funcionarios/editar/<%= f.id %>"><button type="submit">Editar</button></a>
+          <% if (f.status) { %>
+            <form method="POST" action="/funcionarios/inativar/<%= f.id %>" style="display:inline;">
+               <button type="submit">Inativar</button>
+            </form>
+         <% } else { %>
+            <form method="POST" action="/funcionarios/ativar/<%= f.id %>" style="display:inline;">
+               <button type="submit">Ativar</button>
+            </form>
+         <% } %>
+      </li>
+    <% }) %>
+  </ul>
+</body>
+</html>

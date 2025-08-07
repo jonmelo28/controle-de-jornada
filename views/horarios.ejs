@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head><title>Horários Padrão</title></head>
+<body>
+  <h1>Horários Padrão</h1>
+  <a href="/horarios/novo">Novo Horário</a>
+  <ul>
+    <% horarios.forEach(h => { %>
+      <li>
+        <%= h.descricao %> - Entrada: <%= h.entrada %> - Saída Intervalo: <%= h.saida_intervalo %> - Retorno: <%= h.retorno_intervalo %> - Saída: <%= h.saida %> - <%= h.status ? "Ativo" : "Inativo" %>
+        <a href="/horarios/editar/<%= h.id %>">Editar</a>
+        <% if (h.status) { %>
+          <form method="POST" action="/horarios/inativar/<%= h.id %>" style="display:inline;">
+            <button type="submit">Inativar</button>
+          </form>
+        <% } else { %>
+          <form method="POST" action="/horarios/ativar/<%= h.id %>" style="display:inline;">
+            <button type="submit">Ativar</button>
+          </form>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+</body>
+</html>

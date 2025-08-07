@@ -1,0 +1,25 @@
+
+<h2>Dias Úteis por Data</h2>
+<a href="/dias-uteis/novo">+ Novo Dia</a>
+<table border="1">
+  <tr>
+    <th>Data</th>
+    <th>É útil?</th>
+    <th>Ação</th>
+  </tr>
+  <% dias.forEach(d => { %>
+    <tr>
+      <td><%= new Date(d.data).toISOString().split('T')[0] %></td>
+      <td><%= d.eh_util ? 'Sim' : 'Não' %></td>
+      <td>
+        <form action="/dias-uteis/editar/<%= d.id %>" method="POST">
+          <select name="eh_util">
+            <option value="1" <%= d.eh_util ? 'selected' : '' %>>Sim</option>
+            <option value="0" <%= !d.eh_util ? 'selected' : '' %>>Não</option>
+          </select>
+          <button type="submit">Salvar</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+</table>

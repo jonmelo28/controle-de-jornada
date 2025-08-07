@@ -1,0 +1,81 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../models/db');
+
+// Listar todos os horários
+router.get('/', async (req, res) => {
+  const [horarios] = await db.query('SELECT * FROM horarios_padrao');
+  res.render('horarios', { horarios });
+});
+
+// Página de cadastro
+router.get('/novo', (req, res) => {
+  res.render('cadastro_horario');
+});
+
+// Cadastro
+router.post('/novo', async (req, res) => {
+  const { descricao, dia_da_semana, entrada, saida_intervalo, retorno_intervalo, saida } = req.body;
+
+  // Se for sábado, limpar intervalos
+  let saidaInt = saida_intervalo;
+  let retornoInt = retorno_intervalo;
+  if (dia_da_semana === 'sabado') {
+    saidaInt = null;
+    retornoInt = null;
+  }
+
+  await db.query(
+    'INSERT INTO horarios_padrao (descricao, dia_da_semana, entrada, saida_intervalo, retorno_intervalo, saida) VALUES (?, ?, ?, ?, ?, ?)',
+    [descricao, dia_da_semana, entrada, saidaInt, retornoInt, saida]
+  );
+  res.redirect('/horarios');
+});
+
+// Página de edição
+router.get('/editar/:id', async (req, res) => {
+  const { id } = req.params;
+  const [rows] = await db.query('SELECT * FROM horarios_padrao WHERE id = ?', [id]);
+
+  if (rows.length === 0) {
+    return res.send('Horário padrão não encontrado.');
+  }
+
+  res.render('editar_horario', { horario: rows[0] });
+});
+
+// Atualizar
+router.post('/editar/:id', async (req, res) => {
+  const { id } = req.params;
+  const { descricao, dia_da_semana, entrada, saida_intervalo, retorno_intervalo, saida } = req.body;
+
+  let saidaInt = saida_intervalo;
+  let retornoInt = retorno_intervalo;
+  if (dia_da_semana === 'sabado') {
+    saidaInt = null;
+    retornoInt = null;
+  }
+
+  await db.query(
+    'UPDATE horarios_padrao SET descricao = ?, dia_da_semana = ?, entrada = ?, saida_intervalo = ?, retorno_intervalo = ?, saida = ? WHERE id = ?',
+    [descricao, dia_da_semana, entrada, saidaInt, retornoInt, saida, id]
+  );
+
+  res.redirect('/horarios');
+});
+
+// Inativar
+router.post('/inativar/:id', async (req, res) => {
+  const { id } = req.params;
+  await db.query('UPDATE horarios_padrao SET status = FALSE WHERE id = ?', [id]);
+  res.redirect('/horarios');
+});
+
+// Ativar
+router.post('/ativar/:id', async (req, res) => {
+  const { id } = req.params;
+  await db.query('UPDATE horarios_padrao SET status = TRUE WHERE id = ?', [id]);
+  res.redirect('/horarios');
+});
+
+module.exports = router;

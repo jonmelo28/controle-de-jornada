@@ -1,0 +1,43 @@
+
+<h2>Gerenciar Dias Úteis</h2>
+
+<form method="GET" action="/dias-uteis/gerenciar">
+  <label>Mês:</label>
+  <input type="number" name="mes" value="<%= mes %>" min="1" max="12">
+  <label>Ano:</label>
+  <input type="number" name="ano" value="<%= ano %>">
+  <button type="submit">Filtrar</button>
+</form>
+
+<form method="POST" action="/dias-uteis/salvar">
+  <input type="hidden" name="mes" value="<%= mes %>">
+  <input type="hidden" name="ano" value="<%= ano %>">
+  <table border="1">
+    <tr>
+      <th>Data</th>
+      <th>Dia da Semana</th>
+      <th>É útil?</th>
+    </tr>
+    <% dias.forEach(d => { %>
+      <tr>
+        <td><%= d.data.split('-').reverse().join('/') %></td>
+        <td><%= d.diaSemana %></td>
+        <td>
+          <input type="checkbox" name="dias_uteis" value="<%= d.data %>" <%= d.eh_util === 'S' ? 'checked' : '' %>>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+  <button type="submit">Salvar Dias Úteis</button>
+</form>
+
+<h3>Replicar Mês</h3>
+<form method="POST" action="/dias-uteis/replicar">
+  <label>De:</label>
+  <input type="number" name="mesOrigem" placeholder="Mês" required>
+  <input type="number" name="anoOrigem" placeholder="Ano" required>
+  <label>Para:</label>
+  <input type="number" name="mesDestino" placeholder="Mês" required>
+  <input type="number" name="anoDestino" placeholder="Ano" required>
+  <button type="submit">Replicar</button>
+</form>

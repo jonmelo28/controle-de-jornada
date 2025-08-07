@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>Editar Usuário</title></head>
+<body>
+  <h1>Editar Usuário</h1>
+  <form method="POST" action="/usuarios/editar/<%= usuario.id %>">
+    <input name="nome" value="<%= usuario.nome %>" placeholder="Nome" required><br>
+    <input name="email" value="<%= usuario.email %>" placeholder="Email" required><br>
+    <select name="nivel" required>
+      <option value="admin" <%= usuario.nivel === 'admin' ? 'selected' : '' %>>Administrador</option>
+      <option value="comum" <%= usuario.nivel === 'comum' ? 'selected' : '' %>>Comum</option>
+    </select><br>
+    <button type="submit">Atualizar</button>
+  </form>
+  <a href="/usuarios">Voltar</a>
+</body>
+</html>
