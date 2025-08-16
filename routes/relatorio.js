@@ -5,6 +5,9 @@ const db = require('../db');
 const { gerarRelatorioCompleto } = require('../utils/relatorio');
 const { gerarPDF } = require('../utils/exportPdf');
 const { gerarExcel } = require('../utils/exportExcel');
+const ExcelJS = require('exceljs');
+const dayjs = require('dayjs');
+const puppeteer = require('puppeteer');
 
 router.get('/', async (req, res) => {
     const [funcionarios] = await db.query('SELECT * FROM funcionarios');

@@ -3,6 +3,9 @@ const router = express.Router();
 const db = require('../models/db');
 const { calcularHorasJornada } = require('../utils/calculos');
 const { gerarRelatorioCompleto } = require('../utils/relatorio');
+const ExcelJS = require('exceljs');
+const dayjs = require('dayjs');
+const puppeteer = require('puppeteer');
 
 // Página de registro de jornada
 router.get('/registrar', async (req, res) => {
@@ -203,6 +206,161 @@ router.get('/relatorio_avancado', async (req, res) => {
     return res.status(500).send('Erro ao gerar relatório');
   }
 });
+
+const { getRelatorio } = require('../utils/relatorio');
+
+// ====== EXCEL ======
+router.get('/excel', async (req, res) => {
+  try {
+    const { id_funcionario, data_inicio, data_fim } = req.query;
+    const { funcionario, relatorio, resumo } = await getRelatorio(id_funcionario, data_inicio, data_fim);
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Relatório', {
+      pageSetup: {
+        paperSize: 9, // A4
+        orientation: 'landscape',
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 1,
+        margins: { left:0.3, right:0.3, top:0.4, bottom:0.4 }
+      },
+      properties: { defaultRowHeight: 18 }
+    });
+
+    // Cabeçalho superior
+    ws.mergeCells('A1', 'H1'); ws.getCell('A1').value = `Funcionário: ${funcionario?.nome || ''}`;
+    ws.mergeCells('A2', 'H2'); ws.getCell('A2').value = `Período: ${dayjs(data_inicio).format('DD/MM/YYYY')} a ${dayjs(data_fim).format('DD/MM/YYYY')}`;
+    ws.getCell('A1').font = { bold: true }; ws.getCell('A2').font = { bold: true };
+
+    // Cabeçalho da tabela principal
+   const headers = [
+  'Data','Dia','Entrada 1ºT','Saída 1ºT','Entrada 2ºT','Saída 2ºT',
+  'Horas Trabalhadas','Horas Extras','Horas Restantes','Folga 1ºT','Folga 2ºT'
+];
+    const startRow = 4;
+    ws.getRow(startRow).values = headers;
+    ws.getRow(startRow).font = { bold: true };
+    ws.getRow(startRow).alignment = { horizontal:'center', vertical:'middle' };
+
+    // Linhas
+    // ESPERADO: cada item de relatorio tem { data, dia, e1, s1, e2, s2, ht, he, hr, folga1, folga2 }
+    // Linhas (ajuste os nomes para bater com utils/relatorio.js)
+relatorio.forEach((r, i) => {
+  const row = ws.getRow(startRow + 1 + i);
+  row.values = [
+    dayjs(r.data).format('DD/MM/YYYY'),
+    r.dia,
+    r.entrada || '-',
+    r.saida_intervalo || '-',
+    r.retorno_intervalo || '-',
+    r.saida || '-',
+    r.horas_trabalhadas || '0:00',
+    r.horas_extras || '0:00',
+    r.horas_restantes || '0:00',
+    r.folga_primeiro_periodo === 'S' ? '✔' : '',
+    r.folga_segundo_periodo === 'S' ? '✔' : ''
+  ];
+  row.alignment = { horizontal:'center', vertical:'middle' };
+});
+
+
+    // Bordas e largura
+    const lastRow = startRow + relatorio.length;
+    const lastCol = headers.length;
+    for (let r = startRow; r <= lastRow; r++) {
+      for (let c = 1; c <= lastCol; c++) {
+        const cell = ws.getCell(r, c);
+        cell.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
+      }
+    }
+    const widths = [12,16,12,12,12,12,16,14,16,10,10];
+    widths.forEach((w, i) => ws.getColumn(i+1).width = w);
+
+    // Resumo “fixo” à DIREITA da tabela
+    // colocaremos a partir da coluna L (12)
+const colResumo = 13;
+const resumoPairs = [
+  ['Resumo Geral', ''],
+  ['Horas Trabalhadas', resumo.total_trabalhadas || '0:00'],
+  ['Horas Extras', resumo.total_extras || '0:00'],
+  ['Horas Restantes', resumo.total_restantes || '0:00'],
+  ['Saldo (ST)', resumo.saldo || '0:00'],
+  ['Salário Base', `R$ ${Number(resumo.salario_base || 0).toFixed(2)}`],
+  ['Valor da Hora', `R$ ${Number(resumo.valor_hora || 0).toFixed(2)}`],
+  ['Valor Hora Extra', `R$ ${Number(resumo.valor_hora_extra || 0).toFixed(2)}`],
+  ['Horas Extras em R$', `R$ ${Number(resumo.valor_horas_extras_rs || 0).toFixed(2)}`],
+  ['DSR', `R$ ${Number(resumo.dsr || 0).toFixed(2)}`]
+];
+
+
+    let rr = 1;
+    resumoPairs.forEach(([k,v]) => {
+      ws.getCell(rr, colResumo).value = k;
+      ws.getCell(rr, colResumo+1).value = v;
+      ws.getCell(rr, colResumo).font = k==='Resumo Geral' ? { bold:true } : {};
+      ws.getCell(rr, colResumo).alignment = { horizontal:'left' };
+      ws.getCell(rr, colResumo+1).alignment = { horizontal:'right' };
+      // bordas
+      [ws.getCell(rr, colResumo), ws.getCell(rr, colResumo+1)].forEach(cell=>{
+        cell.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
+      });
+      rr++;
+    });
+
+    ws.getColumn(colResumo).width = 28;
+    ws.getColumn(colResumo+1).width = 18;
+
+    // Congelar cabeçalho
+    ws.views = [{ state:'frozen', xSplit:0, ySplit:startRow }];
+
+    // Download
+    const filename = `relatorio_${funcionario?.nome || 'funcionario'}_${dayjs().format('YYYYMMDD_HHmm')}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao gerar Excel.');
+  }
+});
+
+// ====== PDF (via Puppeteer “print” da página EJS) ======
+router.get('/pdf', async (req, res) => {
+  try {
+    const { id_funcionario, data_inicio, data_fim } = req.query;
+
+    // Monte uma URL interna que renderiza sua EJS (modo "print")
+    const base = `${req.protocol}://${req.get('host')}`;
+    const url = `${base}/jornada/relatorio_avancado?id_funcionario=${id_funcionario}&data_inicio=${data_inicio}&data_fim=${data_fim}&print=1`;
+
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox','--disable-setuid-sandbox']
+    });
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: 'networkidle0' });
+
+    // Forçar paisagem + fundo
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      landscape: true,
+      printBackground: true,
+      margin: { top:'10mm', right:'10mm', bottom:'10mm', left:'10mm' }
+    });
+
+    await browser.close();
+
+    const filename = `relatorio_${dayjs().format('YYYYMMDD_HHmm')}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao gerar PDF.');
+  }
+});
+
   
   function formatDataSeguro(date) {
     if (date instanceof Date) {

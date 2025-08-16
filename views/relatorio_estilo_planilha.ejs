@@ -121,21 +121,17 @@
   </table>
 
   <!-- Botões de exportação -->
-  <div class="d-flex gap-2 mt-4">
-    <form method="GET" action="/jornada/exportar_excel">
-      <input type="hidden" name="id_funcionario" value="<%= filtros.id_funcionario %>">
-      <input type="hidden" name="data_inicio" value="<%= filtros.data_inicio %>">
-      <input type="hidden" name="data_fim" value="<%= filtros.data_fim %>">
-      <button type="submit" class="btn btn-outline-success">Exportar Excel</button>
-    </form>
+  <div class="no-print" style="margin-bottom:12px; display:flex; gap:8px;">
+  <a class="btn btn-sm btn-success"
+     href="/jornada/excel?id_funcionario=<%= filtros.id_funcionario %>&data_inicio=<%= filtros.data_inicio %>&data_fim=<%= filtros.data_fim %>">
+    Exportar Excel
+  </a>
 
-    <form method="GET" action="/jornada/exportar_pdf">
-      <input type="hidden" name="id_funcionario" value="<%= filtros.id_funcionario %>">
-      <input type="hidden" name="data_inicio" value="<%= filtros.data_inicio %>">
-      <input type="hidden" name="data_fim" value="<%= filtros.data_fim %>">
-      <button type="submit" class="btn btn-outline-danger">Exportar PDF</button>
-    </form>
-  </div>
+  <a class="btn btn-sm btn-primary"
+     href="/jornada/pdf?id_funcionario=<%= filtros.id_funcionario %>&data_inicio=<%= filtros.data_inicio %>&data_fim=<%= filtros.data_fim %>">
+    Exportar PDF
+  </a>
+</div>
 
 <% } else { %>
 

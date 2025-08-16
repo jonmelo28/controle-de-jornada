@@ -1,3 +1,6 @@
+
+const db = require('../models/db');
+
 const { calcularHorasJornada, fromDecimal, toDecimal } = require('./calculos');
 
 function gerarRelatorioCompleto(data_inicio, data_fim, jornadasDb, funcionario, diasUteisDb, folgasDb) {
@@ -160,4 +163,78 @@ function gerarRelatorioCompleto(data_inicio, data_fim, jornadasDb, funcionario, 
  return { relatorio, resumo };
 }
 
-module.exports = { gerarRelatorioCompleto };
+// helper local
+function formatDataSeguro(date) {
+  if (date instanceof Date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  } else if (typeof date === 'string') {
+    return date.split('T')[0].split(' ')[0];
+  }
+  throw new Error(`Formato de data inválido: ${date}`);
+}
+
+// NOVO: função que monta tudo que a exportação precisa
+async function getRelatorio(id_funcionario, data_inicio, data_fim) {
+  const di = normalizeYMD(data_inicio);
+  const df = normalizeYMD(data_fim);
+  // funcionário
+  const [funcionarioRes] = await db.query('SELECT * FROM funcionarios WHERE id = ?', [id_funcionario]);
+  const funcionario = funcionarioRes[0] || null;
+
+  // jornadas do período
+  const [jornadasDb] = await db.query(
+    `SELECT id, id_funcionario, DATE_FORMAT(data, '%Y-%m-%d') AS data,
+            entrada, saida_intervalo, retorno_intervalo, saida
+     FROM jornadas
+     WHERE id_funcionario = ? AND data BETWEEN ? AND ?
+     ORDER BY data ASC`,
+    [id_funcionario, di, df]
+  );
+
+  // dias úteis
+  const [diasUteisDb] = await db.query(
+    `SELECT DATE_FORMAT(data, "%Y-%m-%d") as data, eh_util
+     FROM dias_uteis
+     WHERE data BETWEEN ? AND ?
+     ORDER BY data ASC`,
+    [di, df]
+  );
+
+  // folgas
+  const [folgasDb] = await db.query(
+    `SELECT DATE_FORMAT(data, "%Y-%m-%d") AS data, folga_primeiro_periodo, folga_segundo_periodo
+     FROM folgas
+     WHERE id_funcionario = ? AND data BETWEEN ? AND ?
+     ORDER BY data ASC`,
+    [id_funcionario, di, df]
+  );
+
+  const { relatorio, resumo } = gerarRelatorioCompleto(
+    di, 
+    df, 
+    jornadasDb, 
+    funcionario, 
+    diasUteisDb, 
+    folgasDb
+  );
+
+  return { funcionario, relatorio, resumo };
+}
+
+function normalizeYMD(input) {
+  if (!input) return input;
+  // já está YYYY-MM-DD?
+  const m1 = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(input));
+  if (m1) return `${m1[1]}-${m1[2]}-${m1[3]}`;
+  // está DD/MM/YYYY?
+  const m2 = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(input));
+  if (m2) return `${m2[3]}-${m2[2]}-${m2[1]}`;
+  // fallback: tenta cortar "T..." ou " HH:mm..."
+  return String(input).split('T')[0].split(' ')[0];
+}
+
+
+module.exports = { gerarRelatorioCompleto, getRelatorio };
