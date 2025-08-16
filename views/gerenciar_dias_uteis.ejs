@@ -1,43 +1,133 @@
+<%- include('partials/header') %>
 
-<h2>Gerenciar Dias Úteis</h2>
+<%
+  // Ajuda a montar selects de mês/ano
+  const meses = [
+    {v:1,t:'Janeiro'},{v:2,t:'Fevereiro'},{v:3,t:'Março'},{v:4,t:'Abril'},
+    {v:5,t:'Maio'},{v:6,t:'Junho'},{v:7,t:'Julho'},{v:8,t:'Agosto'},
+    {v:9,t:'Setembro'},{v:10,t:'Outubro'},{v:11,t:'Novembro'},{v:12,t:'Dezembro'}
+  ];
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function fmtPt(s){ // espera 'YYYY-MM-DD'
+    if(!s) return '-';
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s));
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : s;
+  }
+%>
 
-<form method="GET" action="/dias-uteis/gerenciar">
-  <label>Mês:</label>
-  <input type="number" name="mes" value="<%= mes %>" min="1" max="12">
-  <label>Ano:</label>
-  <input type="number" name="ano" value="<%= ano %>">
-  <button type="submit">Filtrar</button>
-</form>
+<h2 class="mb-4">Gerenciar Dias Úteis</h2>
 
-<form method="POST" action="/dias-uteis/salvar">
-  <input type="hidden" name="mes" value="<%= mes %>">
-  <input type="hidden" name="ano" value="<%= ano %>">
-  <table border="1">
-    <tr>
-      <th>Data</th>
-      <th>Dia da Semana</th>
-      <th>É útil?</th>
-    </tr>
-    <% dias.forEach(d => { %>
-      <tr>
-        <td><%= d.data.split('-').reverse().join('/') %></td>
-        <td><%= d.diaSemana %></td>
-        <td>
-          <input type="checkbox" name="dias_uteis" value="<%= d.data %>" <%= d.eh_util === 'S' ? 'checked' : '' %>>
-        </td>
-      </tr>
-    <% }) %>
-  </table>
-  <button type="submit">Salvar Dias Úteis</button>
-</form>
+<!-- Filtro de mês/ano -->
+<div class="card shadow mb-4">
+  <div class="card-body">
+    <form method="GET" action="/dias-uteis/gerenciar" class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label for="mes" class="form-label">Mês</label>
+        <select id="mes" name="mes" class="form-select">
+          <% meses.forEach(mesOpt => { %>
+            <option value="<%= mesOpt.v %>" <%= Number(mes) === mesOpt.v ? 'selected' : '' %>><%= mesOpt.t %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="ano" class="form-label">Ano</label>
+        <input id="ano" type="number" name="ano" class="form-control" value="<%= ano %>" min="1900" max="2200" required>
+      </div>
+      <div class="col-md-4">
+        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Filtrar</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-<h3>Replicar Mês</h3>
-<form method="POST" action="/dias-uteis/replicar">
-  <label>De:</label>
-  <input type="number" name="mesOrigem" placeholder="Mês" required>
-  <input type="number" name="anoOrigem" placeholder="Ano" required>
-  <label>Para:</label>
-  <input type="number" name="mesDestino" placeholder="Mês" required>
-  <input type="number" name="anoDestino" placeholder="Ano" required>
-  <button type="submit">Replicar</button>
-</form>
+<!-- Tabela de dias do mês -->
+<div class="card shadow mb-4">
+  <div class="card-body">
+    <form method="POST" action="/dias-uteis/salvar">
+      <input type="hidden" name="mes" value="<%= mes %>">
+      <input type="hidden" name="ano" value="<%= ano %>">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Dias do mês</h5>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="toggleAll">
+          <label class="form-check-label" for="toggleAll">Marcar/Desmarcar todos</label>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center">
+          <thead class="table-dark">
+            <tr>
+              <th>Data</th>
+              <th>Dia da Semana</th>
+              <th>É útil?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% dias.forEach(d => { %>
+              <tr>
+                <td><%= fmtPt(d.data) %></td>
+                <td><%= d.diaSemana %></td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="dias_uteis" value="<%= d.data %>"
+                         <%= d.eh_util === 'S' ? 'checked' : '' %> >
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <button type="submit" class="btn btn-success"><i class="bi bi-cloud-check"></i> Salvar Dias Úteis</button>
+    </form>
+  </div>
+</div>
+
+<!-- Replicar mês -->
+<div class="card shadow">
+  <div class="card-body">
+    <h5 class="mb-3">Replicar Mês</h5>
+    <form method="POST" action="/dias-uteis/replicar" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">De (Mês)</label>
+        <select name="mesOrigem" class="form-select" required>
+          <% meses.forEach(mesOpt => { %>
+            <option value="<%= mesOpt.v %>"><%= mesOpt.t %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">De (Ano)</label>
+        <input type="number" name="anoOrigem" class="form-control" placeholder="Ano" min="1900" max="2200" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Para (Mês)</label>
+        <select name="mesDestino" class="form-select" required>
+          <% meses.forEach(mesOpt => { %>
+            <option value="<%= mesOpt.v %>"><%= mesOpt.t %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Para (Ano)</label>
+        <input type="number" name="anoDestino" class="form-control" placeholder="Ano" min="1900" max="2200" required>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-outline-primary"><i class="bi bi-copy"></i> Replicar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Marcar/desmarcar todos
+  const toggleAll = document.getElementById('toggleAll');
+  toggleAll?.addEventListener('change', () => {
+    document.querySelectorAll('input[name="dias_uteis"]').forEach(cb => {
+      cb.checked = toggleAll.checked;
+    });
+  });
+</script>
+
+<%- include('partials/footer') %>

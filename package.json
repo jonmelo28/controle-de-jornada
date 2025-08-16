@@ -13,8 +13,10 @@
     "dotenv": "^16.0.3",
     "ejs": "^3.1.10",
     "express": "^4.21.2",
+    "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.18.1",
-    "mysql2": "^3.14.1"
+    "mysql2": "^3.14.1",
+    "puppeteer": "^24.16.1"
   },
   "keywords": [],
   "author": "",

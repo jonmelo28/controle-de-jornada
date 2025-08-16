@@ -1,19 +1,45 @@
-<!DOCTYPE html>
-<html>
-<head><title>Cadastrar Usuário</title></head>
-<body>
-  <h1>Cadastrar Usuário</h1>
-  <form method="POST" action="/auth/cadastro">
-    <input name="nome" placeholder="Nome" required><br>
-    <input name="email" type="email" placeholder="E-mail" required><br>
-    <input name="senha" type="password" placeholder="Senha" required><br>
-    <select name="nivel" required>
-      <option value="">Selecione o nível</option>
-      <option value="admin">Administrador</option>
-      <option value="comum">Comum</option>
-    </select><br>
-    <button type="submit">Cadastrar</button>
-  </form>
-  <a href="/auth/login">Voltar para login</a>
-</body>
-</html>
+<%- include('partials/header') %>
+
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow">
+      <div class="card-body">
+        <h2 class="mb-4 text-center">Cadastrar Usuário</h2>
+
+        <form method="POST" action="/auth/cadastro" class="row g-3">
+          <div class="col-12">
+            <label for="nome" class="form-label">Nome</label>
+            <input type="text" id="nome" name="nome" class="form-control" placeholder="Digite o nome" required>
+          </div>
+
+          <div class="col-12">
+            <label for="email" class="form-label">E-mail</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="Digite o e-mail" required>
+          </div>
+
+          <div class="col-12">
+            <label for="senha" class="form-label">Senha</label>
+            <input type="password" id="senha" name="senha" class="form-control" placeholder="Digite a senha" required>
+          </div>
+
+          <div class="col-12">
+            <label for="nivel" class="form-label">Nível</label>
+            <select id="nivel" name="nivel" class="form-select" required>
+              <option value="">Selecione o nível</option>
+              <option value="admin">Administrador</option>
+              <option value="comum">Comum</option>
+            </select>
+          </div>
+
+          <div class="col-12 mt-2">
+            <button type="submit" class="btn btn-success w-100">Cadastrar</button>
+            <a href="/usuarios" class="btn btn-secondary w-100 mt-2">← Voltar</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

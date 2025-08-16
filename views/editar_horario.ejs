@@ -1,52 +1,153 @@
-<!DOCTYPE html>
-<html>
-<head><title>Editar Horário</title></head>
-<body>
-  <h1>Editar Horário Padrão</h1>
-  <form method="POST" action="/horarios/editar/<%= horario.id %>">
-    <input name="descricao" value="<%= horario.descricao %>" required><br>
+<%- include('partials/header') %>
 
-    <label for="dia_da_semana">Dia da Semana:</label>
-    <select name="dia_da_semana" id="dia_da_semana" required onchange="ajustarCampos()">
-      <option value="segunda" <%= horario.dia_da_semana === 'segunda' ? 'selected' : '' %>>Segunda</option>
-      <option value="terca" <%= horario.dia_da_semana === 'terca' ? 'selected' : '' %>>Terça</option>
-      <option value="quarta" <%= horario.dia_da_semana === 'quarta' ? 'selected' : '' %>>Quarta</option>
-      <option value="quinta" <%= horario.dia_da_semana === 'quinta' ? 'selected' : '' %>>Quinta</option>
-      <option value="sexta" <%= horario.dia_da_semana === 'sexta' ? 'selected' : '' %>>Sexta</option>
-      <option value="sabado" <%= horario.dia_da_semana === 'sabado' ? 'selected' : '' %>>Sábado</option>
-    </select><br>
+<div class="row justify-content-center">
+  <div class="col-lg-6 col-xl-5">
+    <div class="card shadow">
+      <div class="card-body">
+        <h2 class="mb-4 text-center">Editar Horário Padrão</h2>
 
-    <input name="entrada" type="time" value="<%= horario.entrada %>" required><br>
-    <div id="intervalos">
-      <input name="saida_intervalo" type="time" value="<%= horario.saida_intervalo %>" placeholder="Saída Intervalo"><br>
-      <input name="retorno_intervalo" type="time" value="<%= horario.retorno_intervalo %>" placeholder="Retorno Intervalo"><br>
+        <form method="POST" action="/horarios/editar/<%= horario.id %>" class="row g-3" id="formHorario" onsubmit="return validarHorarios()">
+
+          <!-- Descrição -->
+          <div class="col-12">
+            <label for="descricao" class="form-label">Descrição</label>
+            <input type="text" id="descricao" name="descricao" class="form-control" value="<%= horario.descricao %>" required>
+          </div>
+
+          <!-- Dia da semana -->
+          <div class="col-12">
+            <label for="dia_da_semana" class="form-label">Dia da Semana</label>
+            <select name="dia_da_semana" id="dia_da_semana" class="form-select" required>
+              <option value="segunda" <%= horario.dia_da_semana === 'segunda' ? 'selected' : '' %>>Segunda</option>
+              <option value="terca"   <%= horario.dia_da_semana === 'terca'   ? 'selected' : '' %>>Terça</option>
+              <option value="quarta"  <%= horario.dia_da_semana === 'quarta'  ? 'selected' : '' %>>Quarta</option>
+              <option value="quinta"  <%= horario.dia_da_semana === 'quinta'  ? 'selected' : '' %>>Quinta</option>
+              <option value="sexta"   <%= horario.dia_da_semana === 'sexta'   ? 'selected' : '' %>>Sexta</option>
+              <option value="sabado"  <%= horario.dia_da_semana === 'sabado'  ? 'selected' : '' %>>Sábado</option>
+            </select>
+          </div>
+
+          <!-- Linha 1: Entrada / Saída -->
+          <div class="col-md-6">
+            <label for="entrada" class="form-label">Entrada 1º Turno</label>
+            <input name="entrada" id="entrada" type="time" class="form-control" value="<%= horario.entrada %>" required>
+          </div>
+          <div class="col-md-6">
+            <label for="saida_intervalo" class="form-label">Saída 1º Turno</label>
+            <input name="saida_intervalo" id="saida_intervalo" type="time" class="form-control" value="<%= horario.saida_intervalo %>" required>
+          </div>
+
+          <!-- Linha 2: Intervalos (oculta no sábado) -->
+          <div id="intervalos" class="row g-3">
+            <div class="col-md-6">
+              <label for="retorno_intervalo" class="form-label">Entrada 2º Turno</label>
+              <input name="retorno_intervalo" id="retorno_intervalo" type="time" class="form-control" value="<%= horario.retorno_intervalo %>">
+            </div>
+            <div class="col-md-6">
+              <label for="saida" class="form-label">Saída 2º Turno</label>
+              <input name="saida" id="saida" type="time" class="form-control" value="<%= horario.saida %>">
+            </div>
+          </div>
+
+          <!-- Ações -->
+          <div class="col-12 mt-2">
+            <button type="submit" class="btn btn-success w-100">Atualizar</button>
+            <a href="/horarios" class="btn btn-secondary w-100 mt-2">← Voltar</a>
+          </div>
+        </form>
+
+      </div>
     </div>
-    <input name="saida" type="time" value="<%= horario.saida %>" required><br>
+  </div>
+</div>
 
-    <button type="submit">Atualizar</button>
-  </form>
+<script>
+  (function () {
+    const diaSelect         = document.getElementById('dia_da_semana');
+    const intervalos        = document.getElementById('intervalos');
+    const entrada           = document.getElementById('entrada');             // 1º turno - entrada
+    const saidaIntervalo    = document.getElementById('saida_intervalo');     // 1º turno - saída
+    const retornoIntervalo  = document.getElementById('retorno_intervalo');   // 2º turno - entrada
+    const saida             = document.getElementById('saida');               // 2º turno - saída
 
-  <script>
-  function ajustarCampos() {
-    const dia = document.getElementById('dia_da_semana').value;
-    const intervalos = document.getElementById('intervalos');
-    const saidaIntervalo = document.querySelector('input[name="saida_intervalo"]');
-    const retornoIntervalo = document.querySelector('input[name="retorno_intervalo"]');
-
-    if (dia === 'sabado') {
-      intervalos.style.display = 'none';
-      saidaIntervalo.required = false;
-      retornoIntervalo.required = false;
-    } else {
-      intervalos.style.display = 'block';
-      saidaIntervalo.required = true;
-      retornoIntervalo.required = true;
+    function setSecondShiftDisabled(disabled) {
+      // remova obrigatoriedade e desabilite para não validar nem enviar no POST
+      if (disabled) {
+        retornoIntervalo.removeAttribute('required');
+        saida.removeAttribute('required');
+        retornoIntervalo.value = '';
+        saida.value = '';
+      } else {
+        retornoIntervalo.setAttribute('required', 'required');
+        saida.setAttribute('required', 'required');
+      }
+      retornoIntervalo.disabled = disabled;
+      saida.disabled = disabled;
     }
-  }
 
-  ajustarCampos(); // Inicializa no carregamento
+    function ajustarCampos() {
+      const isSabado = diaSelect.value === 'sabado';
+      if (isSabado) {
+        intervalos.style.display = 'none';
+        setSecondShiftDisabled(true);
+      } else {
+        intervalos.style.display = '';
+        setSecondShiftDisabled(false);
+      }
+    }
+
+    // Validação simples e explícita
+    window.validarHorarios = function validarHorarios() {
+      const isSabado = diaSelect.value === 'sabado';
+
+      const toMin = (hhmm) => {
+        if (!hhmm) return null;
+        const [h, m] = hhmm.split(':').map(Number);
+        return h * 60 + m;
+      };
+
+      const me  = toMin(entrada.value);
+      const msi = toMin(saidaIntervalo.value);
+      const mri = toMin(retornoIntervalo.value);
+      const ms  = toMin(saida.value);
+
+      // Sempre: precisa ter 1º turno válido
+      if (me == null || msi == null) {
+        alert('Preencha os horários de Entrada 1º turno e Saída 1º turno.');
+        return false;
+      }
+      if (me >= msi) {
+        alert('A Saída do 1º turno deve ser maior que a Entrada do 1º turno.');
+        return false;
+      }
+
+      // Sábado: não exige 2º turno
+      if (isSabado) {
+        return true; // deixa enviar
+      }
+
+      // Dias normais: exige 2º turno válido
+      if (mri == null || ms == null) {
+        alert('Preencha Entrada 2º turno e Saída 2º turno (ou selecione Sábado).');
+        return false;
+      }
+      if (mri >= ms) {
+        alert('A Saída do 2º turno deve ser maior que a Entrada do 2º turno.');
+        return false;
+      }
+      // Intervalo precisa estar “no meio”
+      if (!(me < msi && mri < ms)) {
+        alert('O intervalo deve ocorrer entre a Entrada e a Saída.');
+        return false;
+      }
+
+      return true;
+    };
+
+    diaSelect.addEventListener('change', ajustarCampos);
+    ajustarCampos(); // inicializa conforme o valor atual
+  })();
 </script>
 
-  <a href="/horarios">Voltar</a>
-</body>
-</html>
+
+<%- include('partials/footer') %>

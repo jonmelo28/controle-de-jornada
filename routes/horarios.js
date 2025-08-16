@@ -5,20 +5,20 @@ const db = require('../models/db');
 // Listar todos os horários
 router.get('/', async (req, res) => {
   const [horarios] = await db.query('SELECT * FROM horarios_padrao');
-  res.render('horarios', { horarios });
+  res.render('horarios', { horarios, title:"horário" });
 });
 
 // Página de cadastro
 router.get('/novo', (req, res) => {
-  res.render('cadastro_horario');
+  res.render('cadastro_horario',{title:"Cadastrar Horário" });
 });
 
 // Cadastro
 router.post('/novo', async (req, res) => {
-  const { descricao, dia_da_semana, entrada, saida_intervalo, retorno_intervalo, saida } = req.body;
+  const {descricao, dia_da_semana, entrada, saida_intervalo, retorno_intervalo, saida } = req.body;
 
   // Se for sábado, limpar intervalos
-  let saidaInt = saida_intervalo;
+  let saidaInt = saida;
   let retornoInt = retorno_intervalo;
   if (dia_da_semana === 'sabado') {
     saidaInt = null;
@@ -27,7 +27,7 @@ router.post('/novo', async (req, res) => {
 
   await db.query(
     'INSERT INTO horarios_padrao (descricao, dia_da_semana, entrada, saida_intervalo, retorno_intervalo, saida) VALUES (?, ?, ?, ?, ?, ?)',
-    [descricao, dia_da_semana, entrada, saidaInt, retornoInt, saida]
+    [descricao, dia_da_semana, entrada, saida_intervalo, retornoInt, saidaInt]
   );
   res.redirect('/horarios');
 });
@@ -41,7 +41,7 @@ router.get('/editar/:id', async (req, res) => {
     return res.send('Horário padrão não encontrado.');
   }
 
-  res.render('editar_horario', { horario: rows[0] });
+  res.render('editar_horario', { horario: rows[0], title:"Cadastrar Horário" });
 });
 
 // Atualizar
@@ -49,7 +49,7 @@ router.post('/editar/:id', async (req, res) => {
   const { id } = req.params;
   const { descricao, dia_da_semana, entrada, saida_intervalo, retorno_intervalo, saida } = req.body;
 
-  let saidaInt = saida_intervalo;
+  let saidaInt = saida;
   let retornoInt = retorno_intervalo;
   if (dia_da_semana === 'sabado') {
     saidaInt = null;
@@ -58,7 +58,7 @@ router.post('/editar/:id', async (req, res) => {
 
   await db.query(
     'UPDATE horarios_padrao SET descricao = ?, dia_da_semana = ?, entrada = ?, saida_intervalo = ?, retorno_intervalo = ?, saida = ? WHERE id = ?',
-    [descricao, dia_da_semana, entrada, saidaInt, retornoInt, saida, id]
+    [descricao, dia_da_semana, entrada, saida_intervalo, retornoInt, saidaInt, id]
   );
 
   res.redirect('/horarios');

@@ -1,0 +1,40 @@
+<%- include('partials/header') %>
+
+<h4 class="text-center mb-3">Valor Geral <%= cargo %> Horas Trabalhadas/Horas Extras</h4>
+<p class="text-center text-muted">
+  Período: <%= periodo.data_inicio %> a <%= periodo.data_fim %> —
+  Dias úteis: <%= periodo.qnt_uteis %> — Dias descanso: <%= periodo.dias_descanso %>
+</p>
+
+<div class="table-responsive">
+  <table class="table table-bordered table-striped align-middle text-center">
+    <thead class="table-dark">
+      <tr>
+        <th>COLABORADORES</th>
+        <th>SALÁRIO BASE</th>
+        <th>VALOR HORA</th>
+        <th>VALOR HORA EXTRA</th>
+        <th>HORA EXTRA R$</th>
+        <th>DSR</th>
+        <th>VALOR PAGO</th>
+        <th>DIFERENÇA</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% linhas.forEach(l => { %>
+        <tr>
+          <td class="text-start"><%= l.nome %></td>
+          <td>R$ <%= l.salario_base %></td>
+          <td>R$ <%= l.valor_hora %></td>
+          <td>R$ <%= l.valor_hora_extra %></td>
+          <td>R$ <%= l.horas_extras_rs %></td>
+          <td>R$ <%= '0,00' %></td>
+          <td>R$ <%= l.valor_pago %></td>
+          <td><strong>R$ <%= l.diferenca %></strong></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

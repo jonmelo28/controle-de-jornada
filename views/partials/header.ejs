@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title || 'Sistema de Jornada' %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="/"><img src="/images/logo15n.png" alt="Logo" width="50" height="50" class="me-2">Controle de Jornada</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="/funcionarios">Funcionários</a></li>
+          <li class="nav-item"><a class="nav-link" href="/usuarios">Usuários</a></li>
+          <li class="nav-item"><a class="nav-link" href="/jornada/relatorio">Jornadas</a></li>
+          <li class="nav-item"><a class="nav-link" href="/folgas/listar">Folgas</a></li>
+          <li class="nav-item"><a class="nav-link" href="/dias-uteis/gerenciar">Dias Úteis</a></li>
+          <li class="nav-item"><a class="nav-link" href="/horarios">Horario</a></li>
+          <li class="nav-item"><a class="nav-link" href="/pagamentos">Pagamento</a></li>
+          <li class="nav-item dropdown">
+             <a class="nav-link dropdown-toggle <%= (typeof active !== 'undefined' && active === 'relatorios') ? 'active' : '' %>"
+                              href="#" id="navRelatorios" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Relatórios
+             </a>
+             <ul class="dropdown-menu" aria-labelledby="navRelatorios">
+              <li>
+                <a class="dropdown-item" href="/jornada/relatorio_avancado">
+                  <i class="bi bi-card-checklist"></i> Relatório de Jornada
+                </a>
+              </li>    
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="/relatorio_saldo/saldo-total">
+                <i class="bi bi-hourglass-split"></i> Saldo de Horas
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="/relatorios/motoristas">
+                <i class="bi bi-truck"></i> Motoristas
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="/relatorios/ajudantes">
+                <i class="bi bi-people"></i> Ajudantes
+                </a>
+              </li>
+             </ul>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="/auth/logout">Sair</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">

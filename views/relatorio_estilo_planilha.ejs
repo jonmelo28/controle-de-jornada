@@ -1,147 +1,148 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Relatório de Jornada</title>
-    <style>
-        table, th, td {
-            border: 1px solid #000;
-            border-collapse: collapse;
-            padding: 5px;
-            text-align: center;
-        }
-        th {
-            background-color: #ddd;
-        }
-    </style>
-</head>
-<body>
+<%- include('partials/header') %>
+<%
+  // helper para formatar datas em dd/mm/aaaa
+  function fmtData(data) {
+    if (!data) return '-';
 
-    <h1>Relatório de Jornada</h1>
+    // Se vier como Date, converte para string YYYY-MM-DD primeiro:
+    if (data instanceof Date) {
+      const y = data.getFullYear();
+      const m = String(data.getMonth() + 1).padStart(2, '0');
+      const d = String(data.getDate()).padStart(2, '0');
+      return `${d}/${m}/${y}`;
+    }
 
-    <!-- Filtros -->
-    <form method="GET" action="/jornada/relatorio_avancado">
-        <label>Funcionário:</label>
-        <select name="id_funcionario" required>
-            <option value="">Selecione</option>
-            <% funcionarios.forEach(f => { %>
-                <option value="<%= f.id %>" 
-                    <%= filtros && filtros.id_funcionario == f.id ? 'selected' : '' %>>
-                    <%= f.nome %>
-                </option>
-            <% }) %>
-        </select>
+    // Se vier como string 'YYYY-MM-DD' ou 'YYYY-MM-DDTHH:MM:SS...'
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(data));
+    if (m) {
+      const [, y, mo, d] = m;
+      return `${d}/${mo}/${y}`;
+    }
 
-        <label>De:</label>
-        <input type="date" name="data_inicio" required value="<%= filtros ? filtros.data_inicio : '' %>">
+    // Fallback (último recurso)
+    try {
+      const dt = new Date(data);
+      const dia = String(dt.getDate()).padStart(2, '0');
+      const mes = String(dt.getMonth() + 1).padStart(2, '0');
+      const ano = dt.getFullYear();
+      return `${dia}/${mes}/${ano}`;
+    } catch {
+      return String(data);
+    }
+  }
+%>
 
-        <label>Até:</label>
-        <input type="date" name="data_fim" required value="<%= filtros ? filtros.data_fim : '' %>">
+<h1 class="mb-4">Relatório de Jornada</h1>
 
-        <button type="submit">Gerar Relatório</button>
-    </form>
+<!-- Filtros -->
+<form method="GET" action="/jornada/relatorio_avancado" class="row g-3 mb-5">
+  <div class="col-md-4">
+    <label for="id_funcionario" class="form-label">Funcionário:</label>
+    <select name="id_funcionario" id="id_funcionario" class="form-select" required>
+      <option value="">Selecione</option>
+      <% funcionarios.forEach(f => { %>
+        <option value="<%= f.id %>" <%= filtros && filtros.id_funcionario == f.id ? 'selected' : '' %>><%= f.nome %></option>
+      <% }) %>
+    </select>
+  </div>
 
-    <% if (relatorio.length > 0) { %>
+  <div class="col-md-3">
+    <label for="data_inicio" class="form-label">De:</label>
+    <input type="date" name="data_inicio" id="data_inicio" class="form-control" required value="<%= filtros ? filtros.data_inicio : '' %>">
+  </div>
 
-    <h2>Funcionário: <%= funcionario.nome %></h2>
-    <h3>Período: <%= data_inicio %> até <%= data_fim %></h3>
+  <div class="col-md-3">
+    <label for="data_fim" class="form-label">Até:</label>
+    <input type="date" name="data_fim" id="data_fim" class="form-control" required value="<%= filtros ? filtros.data_fim : '' %>">
+  </div>
 
-    <!-- Tabela do Relatório -->
-    <table>
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Dia</th>
-                <th>Entrada</th>
-                <th>Saída Intervalo</th>
-                <th>Retorno Intervalo</th>
-                <th>Saída</th>
-                <th>Horas Trabalhadas</th>
-                <th>Horas Extras</th>
-                <th>Horas Restantes</th>
-                <th>Folga Manhã</th>
-                <th>Folga Tarde</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% relatorio.forEach(r => { %>
-                <tr>
-                    <td><%= r.data %></td>
-                    <td><%= r.dia %></td>
-                    <td><%= r.entrada || '-' %></td>
-                    <td><%= r.saida_intervalo || '-' %></td>
-                    <td><%= r.retorno_intervalo || '-' %></td>
-                    <td><%= r.saida || '-' %></td>
-                    <td><%= r.horas_trabalhadas || '-' %></td>
-                    <td><%= r.horas_extras || '-' %></td>
-                    <td><%= r.horas_restantes || '-' %></td>
-                    <td><%= r.folga_primeiro_periodo === 'S' ? '✔️' : '' %></td>
-                    <td><%= r.folga_segundo_periodo === 'S' ? '✔️' : '' %></td>
-                </tr>
-            <% }) %>
-        </tbody>
-    </table>
+  <div class="col-md-2 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">Gerar Relatório</button>
+  </div>
+</form>
 
-    <!-- Resumo -->
-    <h3>Resumo Geral</h3>
-    <table>
+<% if (relatorio.length > 0) { %>
+
+  <h4 class="mb-3">Funcionário: <%= funcionario.nome %></h4>
+  <h5 class="mb-4">Período: <%= fmtData(data_inicio) %> até <%= fmtData(data_fim) %></h5>
+
+  <!-- Tabela de Jornadas -->
+  <div class="table-responsive mb-4">
+    <table class="table table-bordered table-striped align-middle text-center">
+      <thead class="table-dark">
         <tr>
-            <th>Horas Trabalhadas</th>
-            <td><%= resumo.total_trabalhadas %></td>
+          <th>Data</th>
+          <th>Dia</th>
+          <th>Entrada 1º T.</th>
+          <th>Saída 1º T.</th>
+          <th>Entrada 2º T.</th>
+          <th>Saída 2º T.</th>
+          <th>Horas Trabalhadas</th>
+          <th>Horas Extras</th>
+          <th>Horas Restantes</th>
+          <th>Folga 1º T.</th>
+          <th>Folga 2º T.</th>
         </tr>
-        <tr>
-            <th>Horas Extras</th>
-            <td><%= resumo.total_extras %></td>
-        </tr>
-        <tr>
-            <th>Horas Restantes</th>
-            <td><%= resumo.total_restantes %></td>
-        </tr>
-        <tr>
-            <th>Saldo</th>
-            <td><%= resumo.saldo %></td>
-        </tr>
+      </thead>
+      <tbody>
+        <% relatorio.forEach(r => { %>
           <tr>
-            <th>Salário Base</th>
-            <td>R$ <%= resumo.salario_base %></td>
-        </tr>
-        <tr>
-            <th>Valor Hora</th>
-            <td>R$ <%= resumo.valor_hora %></td>
-        </tr>
-        <tr>
-            <th>Valor Hora Extra</th>
-            <td>R$ <%= resumo.valor_hora_extra %></td>
-        </tr>
-        <tr>
-            <th>Valor de Horas Extras</th>
-            <td>R$ <%= resumo.valor_horas_extras_rs %></td>
-        </tr>
-        <tr>
-            <th>DSR sobre Extras</th>
-            <td>R$ <%= resumo.dsr %></td>
-        </tr>
+            <td><%= fmtData(r.data) %></td>
+            <td><%= r.dia %></td>
+            <td><%= r.entrada || '-' %></td>
+            <td><%= r.saida_intervalo || '-' %></td>
+            <td><%= r.retorno_intervalo || '-' %></td>
+            <td><%= r.saida || '-' %></td>
+            <td><%= r.horas_trabalhadas || '-' %></td>
+            <td><%= r.horas_extras || '-' %></td>
+            <td><%= r.horas_restantes || '-' %></td>
+            <td><%= r.folga_primeiro_periodo === 'S' ? '✔️' : '' %></td>
+            <td><%= r.folga_segundo_periodo === 'S' ? '✔️' : '' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
     </table>
+  </div>
 
-    <!-- Botões para exportação -->
-    <br>
+  <!-- Resumo -->
+  <h4 class="mb-3">Resumo Geral</h4>
+  <table class="table table-bordered w-100">
+    <tbody>
+      <tr><th>Horas Trabalhadas</th><td><%= resumo.total_trabalhadas %></td></tr>
+      <tr><th>Horas Extras</th><td><%= resumo.total_extras %></td></tr>
+      <tr><th>Horas Restantes</th><td><%= resumo.total_restantes %></td></tr>
+      <tr><th>Saldo</th><td><%= resumo.saldo %></td></tr>
+      <tr><th>Salário Base</th><td>R$ <%= resumo.salario_base %></td></tr>
+      <tr><th>Valor Hora</th><td>R$ <%= resumo.valor_hora %></td></tr>
+      <tr><th>Valor Hora Extra</th><td>R$ <%= resumo.valor_hora_extra %></td></tr>
+      <tr><th>Valor de Horas Extras</th><td>R$ <%= resumo.valor_horas_extras_rs %></td></tr>
+      <tr><th>DSR sobre Extras</th><td>R$ <%= resumo.dsr %></td></tr>
+    </tbody>
+  </table>
+
+  <!-- Botões de exportação -->
+  <div class="d-flex gap-2 mt-4">
     <form method="GET" action="/jornada/exportar_excel">
-        <input type="hidden" name="id_funcionario" value="<%= filtros.id_funcionario %>">
-        <input type="hidden" name="data_inicio" value="<%= filtros.data_inicio %>">
-        <input type="hidden" name="data_fim" value="<%= filtros.data_fim %>">
-        <button type="submit">Exportar Excel</button>
+      <input type="hidden" name="id_funcionario" value="<%= filtros.id_funcionario %>">
+      <input type="hidden" name="data_inicio" value="<%= filtros.data_inicio %>">
+      <input type="hidden" name="data_fim" value="<%= filtros.data_fim %>">
+      <button type="submit" class="btn btn-outline-success">Exportar Excel</button>
     </form>
 
     <form method="GET" action="/jornada/exportar_pdf">
-        <input type="hidden" name="id_funcionario" value="<%= filtros.id_funcionario %>">
-        <input type="hidden" name="data_inicio" value="<%= filtros.data_inicio %>">
-        <input type="hidden" name="data_fim" value="<%= filtros.data_fim %>">
-        <button type="submit">Exportar PDF</button>
+      <input type="hidden" name="id_funcionario" value="<%= filtros.id_funcionario %>">
+      <input type="hidden" name="data_inicio" value="<%= filtros.data_inicio %>">
+      <input type="hidden" name="data_fim" value="<%= filtros.data_fim %>">
+      <button type="submit" class="btn btn-outline-danger">Exportar PDF</button>
     </form>
+  </div>
 
-    <% } else { %>
-        <p><strong>Selecione um funcionário e um período para gerar o relatório.</strong></p>
-    <% } %>
+<% } else { %>
 
-</body>
-</html>
+  <div class="alert alert-warning mt-4" role="alert">
+    <strong>Selecione um funcionário e um período para gerar o relatório.</strong>
+  </div>
+
+<% } %>
+
+<%- include('partials/footer') %>

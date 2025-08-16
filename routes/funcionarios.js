@@ -6,12 +6,17 @@ const db = require('../models/db');
 // Página de listagem
 router.get('/', async (req, res) => {
   const [funcionarios] = await db.query('SELECT * FROM funcionarios');
-  res.render('funcionarios', { funcionarios });
+  res.render('funcionarios', { 
+    title: 'Lista de Funcionários', 
+    funcionarios 
+  });
 });
 
 // Página de cadastro
 router.get('/novo', (req, res) => {
-  res.render('cadastro_funcionario');
+  res.render('cadastro_funcionario', { 
+    title: 'Cadastrar Funcionário' 
+  });
 });
 
 // Cadastro
@@ -30,7 +35,10 @@ router.get('/editar/:id', async (req, res) => {
     return res.send('Funcionário não encontrado.');
   }
 
-  res.render('editar_funcionario', { funcionario: rows[0] });
+  res.render('editar_funcionario', { 
+    title: 'Editar Funcionário',
+    funcionario: rows[0] 
+  });
 });
 
 // Atualizar funcionário

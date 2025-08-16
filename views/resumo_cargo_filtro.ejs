@@ -1,0 +1,18 @@
+<%- include('partials/header') %>
+
+<h3 class="mb-3">Relatório <%= title %></h3>
+<form class="row g-3" method="GET" action="/relatorios/<%= cargo %>s">
+  <div class="col-md-3">
+    <label class="form-label">De</label>
+    <input type="date" name="data_inicio" class="form-control" required>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Até</label>
+    <input type="date" name="data_fim" class="form-control" required>
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button class="btn btn-primary w-100">Gerar</button>
+  </div>
+</form>
+
+<%- include('partials/footer') %>

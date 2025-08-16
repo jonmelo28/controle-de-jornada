@@ -31,7 +31,7 @@ router.post('/login', async (req, res) => {
     req.session.userNivel = user.nivel;
 
     // Redirecionar para a dashboard ou página principal
-    res.redirect('/funcionarios'); // ou outra página que preferir
+    res.redirect('/jornada/relatorio_avancado'); // ou outra página que preferir
   } catch (error) {
     console.error(error);
     res.send('Erro interno.');
@@ -47,7 +47,9 @@ router.get('/logout', (req, res) => {
 
 // Página de cadastro de usuário
 router.get('/cadastro', (req, res) => {
-  res.render('cadastro_usuario');
+  res.render('cadastro_usuario',{
+    title: "Usuários"
+  });
 });
 
 // Cadastro de usuário

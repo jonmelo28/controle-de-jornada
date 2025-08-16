@@ -1,39 +1,90 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title><%= folga ? 'Editar Folga' : 'Cadastrar Folga' %></title>
-</head>
-<body>
-  <h1><%= folga ? 'Editar Folga' : 'Cadastrar Folga' %></h1>
+<%- include('partials/header') %>
 
-  <form method="POST" action="<%= folga ? '/folgas/editar/' + folga.id : '/folgas/cadastrar' %>">
-    <label>Funcionário:</label>
-    <select name="id_funcionario" required>
-      <% funcionarios.forEach(f => { %>
-        <option value="<%= f.id %>" <%= folga && folga.id_funcionario === f.id ? 'selected' : '' %>>
-          <%= f.nome %>
-        </option>
-      <% }) %>
-    </select><br><br>
+<%
+  // Converte "YYYY-MM-DD" (ou "YYYY-MM-DDTHH:mm:ss") para o valor aceito pelo <input type="date">
+  // Sem usar new Date() para evitar problemas de fuso.
+  function toInputDate(val) {
+    if (!val) return '';
+    const m = String(val).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? `${m[1]}-${m[2]}-${m[3]}` : '';
+  }
+%>
 
-    <label>Data:</label>
-    <input type="date" name="data" value="<%= folga ? folga.data.toISOString().split('T')[0] : '' %>" required><br><br>
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-6">
+    <div class="card shadow">
+      <div class="card-body">
+        <h2 class="mb-4 text-center">
+          <%= folga ? 'Editar Folga' : 'Cadastrar Folga' %>
+        </h2>
 
-    <label>
-      <input type="checkbox" name="folga_primeiro_periodo" <%= folga && folga.folga_primeiro_periodo === 'S' ? 'checked' : '' %> >
-      Folga Primeiro Período
-    </label><br>
+        <form method="POST" action="<%= folga ? '/folgas/editar/' + folga.id : '/folgas/cadastrar' %>" class="row g-3">
 
-    <label>
-      <input type="checkbox" name="folga_segundo_periodo" <%= folga && folga.folga_segundo_periodo === 'S' ? 'checked' : '' %> >
-      Folga Segundo Período
-    </label><br><br>
+          <!-- Funcionário -->
+          <div class="col-12">
+            <label for="id_funcionario" class="form-label">Funcionário</label>
+            <select name="id_funcionario" id="id_funcionario" class="form-select" required>
+              <% funcionarios.forEach(f => { %>
+                <option value="<%= f.id %>" <%= folga && Number(folga.id_funcionario) === Number(f.id) ? 'selected' : '' %>>
+                  <%= f.nome %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
 
-    <button type="submit"><%= folga ? 'Atualizar' : 'Cadastrar' %></button>
-  </form>
+          <!-- Data -->
+          <div class="col-md-6">
+            <label for="data" class="form-label">Data</label>
+            <input type="date" id="data" name="data" class="form-control"
+                   value="<%= folga ? toInputDate(folga.data) : '' %>" required>
+          </div>
 
-  <br>
-  <a href="/folgas/listar">Voltar</a>
-</body>
-</html>
+          <!-- Folgas (checkboxes) -->
+          <div class="col-md-6 d-flex align-items-end">
+            <div class="form-check me-4">
+              <input class="form-check-input" type="checkbox" id="fp" 
+                     <%= folga && folga.folga_primeiro_periodo === 'S' ? 'checked' : '' %>>
+              <label class="form-check-label" for="fp">Folga Primeiro Período</label>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="fs" 
+                     <%= folga && folga.folga_segundo_periodo === 'S' ? 'checked' : '' %>>
+              <label class="form-check-label" for="fs">Folga Segundo Período</label>
+            </div>
+          </div>
+
+          <!-- Campos ocultos que realmente enviam S/N -->
+          <input type="hidden" name="folga_primeiro_periodo" id="fp_val" value="<%= folga && folga.folga_primeiro_periodo === 'S' ? 'S' : 'N' %>">
+          <input type="hidden" name="folga_segundo_periodo"  id="fs_val" value="<%= folga && folga.folga_segundo_periodo === 'S' ? 'S' : 'N' %>">
+
+          <!-- Ações -->
+          <div class="col-12 mt-2">
+            <button type="submit" class="btn btn-success w-100"><%= folga ? 'Atualizar' : 'Cadastrar' %></button>
+            <a href="/folgas/listar" class="btn btn-secondary w-100 mt-2">← Voltar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Sincroniza checkboxes com os hidden inputs (enviar 'S'/'N' sempre)
+  const fp = document.getElementById('fp');
+  const fs = document.getElementById('fs');
+  const fpVal = document.getElementById('fp_val');
+  const fsVal = document.getElementById('fs_val');
+
+  function sync() {
+    fpVal.value = fp.checked ? 'S' : 'N';
+    fsVal.value = fs.checked ? 'S' : 'N';
+  }
+  fp?.addEventListener('change', sync);
+  fs?.addEventListener('change', sync);
+  // Inicializa estado correto
+  sync();
+</script>
+
+<%- include('partials/footer') %>
+

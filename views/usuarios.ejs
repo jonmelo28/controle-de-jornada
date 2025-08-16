@@ -1,26 +1,104 @@
-<!DOCTYPE html>
-<html>
-<head><title>Usuários</title></head>
-<body>
-  <h1>Usuários</h1>
-  <a href="/auth/cadastro">Novo Usuário</a>
-  <ul>
-    <% usuarios.forEach(u => { %>
-      <li>
-        <%= u.nome %> - <%= u.email %> - <%= u.nivel %> - <%= u.status ? "Ativo" : "Inativo" %>
-        <a href="/usuarios/editar/<%= u.id %>"><button type="submit">Editar</button></a>
-         <a href="/usuarios/senha/<%= u.id %>"><button type="submit">Atualizar Senha</button></a>
-        <% if (u.status) { %>
-          <form method="POST" action="/usuarios/inativar/<%= u.id %>" style="display:inline;">
-            <button type="submit">Inativar</button>
+<%- include('partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Usuários</h2>
+  <a href="/auth/cadastro" class="btn btn-success"><i class="bi bi-person-fill-add"></i> Novo Usuário</a>
+</div>
+
+<% if (usuarios && usuarios.length) { %>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-dark text-center">
+        <tr>
+          <th>Nome</th>
+          <th>E-mail</th>
+          <th>Nível</th>
+          <th>Status</th>
+          <th class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% usuarios.forEach(u => { %>
+          <tr>
+            <td><%= u.nome %></td>
+            <td><%= u.email %></td>
+            <td><%= u.nivel %></td>
+            <td class="text-center">
+              <span class="badge <%= u.status ? 'bg-success' : 'bg-secondary' %>">
+               <%- u.status ? '<i class="bi bi-person-fill-check"></i> Ativo' : '<i class="bi bi-person-fill-slash"></i> Inativo' %>
+              </span>
+            </td>
+            <td class="text-center">
+              <a href="/usuarios/editar/<%= u.id %>" class="btn btn-sm btn-primary me-2"><i class="bi bi-person-fill-gear"></i> Editar</a>
+              <a href="/usuarios/senha/<%= u.id %>" class="btn btn-sm btn-warning me-2"><i class="bi bi-arrow-repeat"></i> Atualizar Senha</a>
+
+              <% if (u.status) { %>
+  <!-- Botão que abre o modal de inativar -->
+  <button type="button" class="btn btn-sm btn-outline-danger"
+          data-bs-toggle="modal" data-bs-target="#modalInativar<%= u.id %>">
+    <i class="bi bi-person-fill-slash"></i> Inativar
+  </button>
+
+  <!-- Modal de confirmação para inativar -->
+  <div class="modal fade" id="modalInativar<%= u.id %>" tabindex="-1" aria-labelledby="modalInativarLabel<%= u.id %>" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="modalInativarLabel<%= u.id %>">Confirmar Inativação</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          Tem certeza que deseja <strong>inativar</strong> o usuário <strong><%= u.nome %></strong>?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <form method="POST" action="/usuarios/inativar/<%= u.id %>" class="d-inline">
+            <button type="submit" class="btn btn-danger">Sim, inativar</button>
           </form>
-        <% } else { %>
-          <form method="POST" action="/usuarios/ativar/<%= u.id %>" style="display:inline;">
-            <button type="submit">Ativar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<% } else { %>
+  <!-- Botão que abre o modal de ativar -->
+  <button type="button" class="btn btn-sm btn-outline-success"
+          data-bs-toggle="modal" data-bs-target="#modalAtivar<%= u.id %>">
+   <i class="bi bi-person-fill-check"></i> Ativar
+  </button>
+
+  <!-- Modal de confirmação para ativar -->
+  <div class="modal fade" id="modalAtivar<%= u.id %>" tabindex="-1" aria-labelledby="modalAtivarLabel<%= u.id %>" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title" id="modalAtivarLabel<%= u.id %>">Confirmar Ativação</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          Tem certeza que deseja <strong>ativar</strong> o usuário <strong><%= u.nome %></strong>?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <form method="POST" action="/usuarios/ativar/<%= u.id %>" class="d-inline">
+            <button type="submit" class="btn btn-success">Sim, ativar</button>
           </form>
-        <% } %>
-      </li>
-    <% }) %>
-  </ul>
-</body>
-</html>
+        </div>
+      </div>
+    </div>
+  </div>
+<% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } else { %>
+  <div class="alert alert-warning" role="alert">
+    Nenhum usuário encontrado.
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>
+

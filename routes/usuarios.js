@@ -6,7 +6,9 @@ const db = require('../models/db');
 // Listar usuários
 router.get('/', async (req, res) => {
   const [usuarios] = await db.query('SELECT * FROM usuarios');
-  res.render('usuarios', { usuarios });
+  res.render('usuarios', { usuarios,
+    title: "Usuários"
+   });
 });
 
 // Página de edição
@@ -18,7 +20,9 @@ router.get('/editar/:id', async (req, res) => {
     return res.send('Usuário não encontrado.');
   }
 
-  res.render('editar_usuario', { usuario: rows[0] });
+  res.render('editar_usuario', { usuario: rows[0],
+    title: "Usuários"
+  });
 });
 
 // Atualizar usuário
@@ -54,7 +58,8 @@ router.get('/senha/:id', async (req, res) => {
     return res.send('Usuário não encontrado.');
   }
 
-  res.render('atualizar_senha', { usuario: rows[0] });
+  res.render('atualizar_senha', { usuario: rows[0],
+    title: "Usuários" });
 });
 
 // Atualizar senha

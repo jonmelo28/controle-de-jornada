@@ -39,6 +39,14 @@ app.use('/dias-uteis', diasUteisRouter);
 const folgasRouter = require('./routes/folgas');
 app.use('/folgas', folgasRouter);
 
+const pagamentosRoutes = require('./routes/pagamentos');
+app.use('/pagamentos', pagamentosRoutes);
+
+const relatoriosRoutes = require('./routes/relatorios');
+app.use('/relatorios', relatoriosRoutes);
+
+const relatorioSaldoRoutes = require('./routes/relatorio_saldo');
+app.use('/relatorio_saldo', relatorioSaldoRoutes);
 
 app.get('/', (req, res) => {
   res.redirect('/auth/login');

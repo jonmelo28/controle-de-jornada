@@ -1,12 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head><title>Atualizar Senha</title></head>
-<body>
-  <h1>Atualizar Senha do Usuário</h1>
-  <form method="POST" action="/usuarios/senha/<%= usuario.id %>">
-    <input name="novaSenha" type="password" placeholder="Nova senha" required><br>
-    <button type="submit">Atualizar Senha</button>
-  </form>
-  <a href="/usuarios">Voltar</a>
-</body>
-</html>
+<%- include('partials/header') %>
+
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow">
+      <div class="card-body">
+        <h2 class="mb-4 text-center">Atualizar Senha</h2>
+        <p class="text-center text-muted mb-4">
+          Usuário: <strong><%= usuario.nome %></strong>
+        </p>
+
+        <form method="POST" action="/usuarios/senha/<%= usuario.id %>" class="row g-3">
+          <div class="col-12">
+            <label for="novaSenha" class="form-label">Nova Senha</label>
+            <input type="password" id="novaSenha" name="novaSenha" class="form-control" placeholder="Digite a nova senha" required>
+          </div>
+
+          <div class="col-12 mt-2">
+            <button type="submit" class="btn btn-success w-100">Atualizar Senha</button>
+            <a href="/usuarios" class="btn btn-secondary w-100 mt-2">← Voltar</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

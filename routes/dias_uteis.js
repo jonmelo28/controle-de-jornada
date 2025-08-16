@@ -40,7 +40,7 @@ const diasCompletos = diasDoMes.map(d => {
 
 });
 
-  res.render('gerenciar_dias_uteis', { mes, ano, dias: diasCompletos });
+  res.render('gerenciar_dias_uteis', { mes, ano, dias: diasCompletos, title:"Dias uteis" });
 });
 
 router.post('/salvar', async (req, res) => {

@@ -1,36 +1,66 @@
-<!DOCTYPE html>
-<html>
-<head><title>Registrar Jornada</title></head>
-<body>
-  <h1>Registrar Jornada</h1>
-  <form method="POST" action="/jornada/registrar">
-    <label for="id_funcionario">Funcionário:</label>
-    <select name="id_funcionario" id="id_funcionario" required>
-      <% funcionarios.forEach(f => { %>
-        <option value="<%= f.id %>"><%= f.nome %></option>
-      <% }) %>
-    </select><br>
+<%- include('partials/header') %>
 
-    <label for="data">Data:</label>
-    <input name="data" type="date" required><br>
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-7">
+    <div class="card shadow">
+      <div class="card-body">
+        <h2 class="mb-4 text-center">Registrar Jornada</h2>
 
-    <label for="entrada">Entrada:</label>
-    <input name="entrada" type="time" required><br>
+        <form method="POST" action="/jornada/registrar" class="row g-3">
 
-    <div id="intervalos">
-      <label for="saida_intervalo">Saída para Intervalo:</label>
-      <input name="saida_intervalo" type="time"><br>
+          <!-- Funcionário -->
+          <div class="col-12">
+            <label for="id_funcionario" class="form-label">Funcionário</label>
+            <select name="id_funcionario" id="id_funcionario" class="form-select" required>
+              <option value="">Selecione</option>
+              <% funcionarios.forEach(f => { %>
+                <option value="<%= f.id %>"><%= f.nome %></option>
+              <% }) %>
+            </select>
+          </div>
 
-      <label for="retorno_intervalo">Retorno do Intervalo:</label>
-      <input name="retorno_intervalo" type="time"><br>
+          <!-- Data -->
+          <div class="col-md-4">
+            <label for="data" class="form-label">Data</label>
+            <input name="data" id="data" type="date" class="form-control" required>
+          </div>
+
+          <!-- Entrada -->
+          <div class="col-md-4">
+            <label for="entrada" class="form-label">Entrada 1º Turno</label>
+            <input name="entrada" id="entrada" type="time" class="form-control">
+          </div>
+           <div class="col-md-4">
+                <label for="saida_intervalo" class="form-label">Saída 1º Turno</label>
+                <input name="saida_intervalo" id="saida_intervalo" type="time" class="form-control">
+           </div>  
+
+          <!-- Intervalos -->
+          <div class="col-12">
+            <div class="row g-3">
+               <div class="col-md-6">
+                <label for="retorno_intervalo" class="form-label">Entrada 2º Turno</label>
+                <input name="retorno_intervalo" id="retorno_intervalo" type="time" class="form-control">
+                <div class="form-text">Opcional</div>           
+            </div>
+               <!-- Saída -->
+               <div class="col-md-6">
+                 <label for="saida" class="form-label">Saída 2º Turno</label>
+                 <input name="saida" id="saida" type="time" class="form-control">
+                 <div class="form-text">Opcional</div>
+               </div>
+            </div>
+          </div>
+          
+          <!-- Ações -->
+          <div class="col-12 mt-3">
+            <button type="submit" class="btn btn-success w-100">Registrar Jornada</button>
+            <a href="/jornada/relatorio" class="btn btn-secondary w-100 mt-2">← Voltar</a>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
+</div>
 
-    <label for="saida">Saída:</label>
-    <input name="saida" type="time" required><br>
-
-    <button type="submit">Registrar Jornada</button>
-  </form>
-
-  <a href="/">Voltar</a>
-</body>
-</html>
+<%- include('partials/footer') %>

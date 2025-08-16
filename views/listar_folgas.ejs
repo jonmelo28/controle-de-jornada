@@ -1,40 +1,90 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Listar Folgas</title>
-</head>
-<body>
-  <h1>Folgas Cadastradas</h1>
+<%- include('partials/header') %>
 
-  <table border="1">
-    <tr>
-      <th>ID</th>
-      <th>Funcionário</th>
-      <th>Data</th>
-      <th>Folga Primeiro Período</th>
-      <th>Folga Segundo Período</th>
-      <th>Ações</th>
-    </tr>
+<%
+  // Formata 'YYYY-MM-DD' (ou 'YYYY-MM-DDTHH:mm:ss') em 'dd/mm/aaaa' sem usar Date()
+  function fmtDataStr(s) {
+    if (!s) return '-';
+    const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return s;
+    const [, y, mo, d] = m;
+    return `${d}/${mo}/${y}`;
+  }
+%>
 
-    <% folgas.forEach(f => { %>
-      <tr>
-        <td><%= f.id %></td>
-        <td><%= f.nome_funcionario %></td>
-        <td><%= f.data.toISOString().split('T')[0] %></td>
-        <td><%= f.folga_primeiro_periodo === 'S' ? 'Sim' : 'Não' %></td>
-        <td><%= f.folga_segundo_periodo === 'S' ? 'Sim' : 'Não' %></td>
-        <td>
-          <a href="/folgas/editar/<%= f.id %>">Editar</a> |
-          <form action="/folgas/excluir/<%= f.id %>" method="POST" style="display:inline;">
-            <button type="submit" onclick="return confirm('Deseja excluir?')">Excluir</button>
-          </form>
-        </td>
-      </tr>
-    <% }) %>
-  </table>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Folgas Cadastradas</h2>
+  <a href="/folgas/cadastrar" class="btn btn-success"><i class="bi bi-database-add"></i> Cadastrar Folga</a>
+</div>
 
-  <br>
-  <a href="/folgas/cadastrar">Cadastrar Nova Folga</a>
-</body>
-</html>
+<% if (folgas && folgas.length) { %>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle text-center">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Funcionário</th>
+          <th>Data</th>
+          <th>Folga Manhã</th>
+          <th>Folga Tarde</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% folgas.forEach(f => { %>
+          <tr>
+            <td><%= f.id %></td>
+            <td><%= f.nome_funcionario %></td>
+            <td><%= fmtDataStr(f.data) %></td>
+            <td>
+              <span class="badge <%= f.folga_primeiro_periodo === 'S' ? 'bg-success' : 'bg-secondary' %>">
+                <%- f.folga_primeiro_periodo === 'S' ? '<i class="bi bi-database-check"></i> Sim' : '<i class="bi bi-database-slash"></i> Não' %>
+              </span>
+            </td>
+            <td>
+              <span class="badge <%= f.folga_segundo_periodo === 'S' ? 'bg-success' : 'bg-secondary' %>">
+                <%- f.folga_segundo_periodo === 'S' ? '<i class="bi bi-database-check"></i> Sim' : '<i class="bi bi-database-slash"></i> Não' %>
+              </span>
+            </td>
+            <td>
+              <a href="/folgas/editar/<%= f.id %>" class="btn btn-sm btn-primary me-2"><i class="bi bi-database-gear"></i> Editar</a>
+            <!-- Botão que abre o modal -->
+<button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confirmModal<%= f.id %>">
+  <i class="bi bi-database-x"></i> Excluir
+</button>
+
+<!-- Modal de confirmação -->
+<div class="modal fade" id="confirmModal<%= f.id %>" tabindex="-1" aria-labelledby="confirmModalLabel<%= f.id %>" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="confirmModalLabel<%= f.id %>">Confirmar Exclusão</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja excluir esta folga de <strong><%= f.nome_funcionario %></strong> em <%= f.data %>?
+        <br><span class="text-muted small">Essa ação não poderá ser desfeita.</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form action="/folgas/excluir/<%= f.id %>" method="POST" class="d-inline">
+          <button type="submit" class="btn btn-danger">Sim, excluir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+              
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } else { %>
+  <div class="alert alert-warning" role="alert">
+    Nenhuma folga cadastrada.
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>
+

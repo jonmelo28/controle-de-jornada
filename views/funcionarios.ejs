@@ -1,25 +1,93 @@
+<%- include('partials/header') %>
 
-<!DOCTYPE html>
-<html>
-<head><title>Funcionários</title></head>
-<body>
-  <h1>Funcionários</h1>
-  <a href="/funcionarios/novo">Novo Funcionário</a>
-  <ul>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Funcionários</h2>
+  <a href="/funcionarios/novo" class="btn btn-success"><i class="bi bi-person-fill-add"></i> Novo Funcionário</a>
+</div>
+
+<table class="table table-striped table-bordered align-middle">
+  <thead class="table-dark">
+    <tr>
+      <th>Nome</th>
+      <th>Cargo</th>
+      <th>Status</th>
+      <th class="text-center">Ações</th>
+    </tr>
+  </thead>
+  <tbody>
     <% funcionarios.forEach(f => { %>
-      <li><%= f.nome %> - <%= f.cargo %> - <%= f.status ? "Ativo" : "Inativo" %>
-          <a href="/funcionarios/editar/<%= f.id %>"><button type="submit">Editar</button></a>
+      <tr>
+        <td><%= f.nome %></td>
+        <td><%= f.cargo %></td>
+        <td class="text-center">
+          <span class="badge <%= f.status ? 'bg-success' : 'bg-secondary' %>">
+            <%- f.status ? '<i class="bi bi-person-fill-check"></i> Ativo' : '<i class="bi bi-person-fill-slash"></i> Inativo' %>
+          </span>
+        </td>
+        <td class="text-center">
+          <a href="/funcionarios/editar/<%= f.id %>" class="btn btn-primary btn-sm me-2">
+            <i class="bi bi-person-fill-gear"></i> Editar</a>
           <% if (f.status) { %>
-            <form method="POST" action="/funcionarios/inativar/<%= f.id %>" style="display:inline;">
-               <button type="submit">Inativar</button>
-            </form>
-         <% } else { %>
-            <form method="POST" action="/funcionarios/ativar/<%= f.id %>" style="display:inline;">
-               <button type="submit">Ativar</button>
-            </form>
-         <% } %>
-      </li>
+  <!-- Botão para abrir modal de inativar -->
+  <button type="button" class="btn btn-warning btn-sm"
+          data-bs-toggle="modal" data-bs-target="#modalInativarFunc<%= f.id %>">
+    <i class="bi bi-person-fill-slash"></i> Inativar
+  </button>
+
+  <!-- Modal de confirmação - Inativar -->
+  <div class="modal fade" id="modalInativarFunc<%= f.id %>" tabindex="-1" aria-labelledby="modalInativarFuncLabel<%= f.id %>" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title" id="modalInativarFuncLabel<%= f.id %>">Confirmar Inativação</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          Tem certeza que deseja <strong>inativar</strong> o funcionário <strong><%= f.nome %></strong>?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <form method="POST" action="/funcionarios/inativar/<%= f.id %>" class="d-inline">
+            <button type="submit" class="btn btn-warning">Sim, inativar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<% } else { %>
+  <!-- Botão para abrir modal de ativar -->
+  <button type="button" class="btn btn-success btn-sm"
+          data-bs-toggle="modal" data-bs-target="#modalAtivarFunc<%= f.id %>">
+    <i class="bi bi-person-fill-check"></i> Ativar
+  </button>
+
+  <!-- Modal de confirmação - Ativar -->
+  <div class="modal fade" id="modalAtivarFunc<%= f.id %>" tabindex="-1" aria-labelledby="modalAtivarFuncLabel<%= f.id %>" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title" id="modalAtivarFuncLabel<%= f.id %>">Confirmar Ativação</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          Tem certeza que deseja <strong>ativar</strong> o funcionário <strong><%= f.nome %></strong>?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <form method="POST" action="/funcionarios/ativar/<%= f.id %>" class="d-inline">
+            <button type="submit" class="btn btn-success">Sim, ativar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+        </td>
+      </tr>
     <% }) %>
-  </ul>
-</body>
-</html>
+  </tbody>
+</table>
+
+<%- include('partials/footer') %>

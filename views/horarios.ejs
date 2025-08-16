@@ -1,25 +1,107 @@
-<!DOCTYPE html>
-<html>
-<head><title>Horários Padrão</title></head>
-<body>
-  <h1>Horários Padrão</h1>
-  <a href="/horarios/novo">Novo Horário</a>
-  <ul>
-    <% horarios.forEach(h => { %>
-      <li>
-        <%= h.descricao %> - Entrada: <%= h.entrada %> - Saída Intervalo: <%= h.saida_intervalo %> - Retorno: <%= h.retorno_intervalo %> - Saída: <%= h.saida %> - <%= h.status ? "Ativo" : "Inativo" %>
-        <a href="/horarios/editar/<%= h.id %>">Editar</a>
-        <% if (h.status) { %>
-          <form method="POST" action="/horarios/inativar/<%= h.id %>" style="display:inline;">
-            <button type="submit">Inativar</button>
-          </form>
-        <% } else { %>
-          <form method="POST" action="/horarios/ativar/<%= h.id %>" style="display:inline;">
-            <button type="submit">Ativar</button>
-          </form>
-        <% } %>
-      </li>
-    <% }) %>
-  </ul>
-</body>
-</html>
+<%- include('partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Horários Padrão</h2>
+  <a href="/horarios/novo" class="btn btn-success"><i class="bi bi-database-add"></i> Novo Horário</a>
+</div>
+
+<% if (horarios.length > 0) { %>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle text-center">
+      <thead class="table-dark">
+        <tr>
+          <th>Descrição</th>
+          <th>Entrada 1º Turno</th>
+          <th>Saída 1º Turno</th>
+          <th>Entrada 2º Turno</th>
+          <th>Saída 2º Turno</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% horarios.forEach(h => { %>
+          <tr>
+            <td><%= h.descricao %></td>
+            <td><%= h.entrada %></td>
+            <td><%= h.saida_intervalo %></td>
+            <td><%= h.retorno_intervalo %></td>
+            <td><%= h.saida %></td>
+            <td>
+              <span class="badge <%= h.status ? 'bg-success' : 'bg-secondary' %>">
+                <%- h.status ? '<i class="bi bi-database-check"></i> Ativo' : '<i class="bi bi-database-slash"></i> Inativo' %>
+              </span>
+            </td>
+            <td>
+              <a href="/horarios/editar/<%= h.id %>" class="btn btn-sm btn-primary me-2"><i class="bi bi-database-gear"></i> Editar</a>
+
+              <% if (h.status) { %>
+                <!-- Abre modal para INATIVAR -->
+                <button type="button"
+                        class="btn btn-sm btn-warning"
+                        data-bs-toggle="modal"
+                        data-bs-target="#confirmModal"
+                        data-action="/horarios/inativar/<%= h.id %>"
+                        data-message="Deseja inativar este horário &quot;<%= h.descricao %>&quot;?">
+                  <i class="bi bi-database-slash"></i> Inativar
+                </button>
+              <% } else { %>
+                <!-- Abre modal para ATIVAR -->
+                <button type="button"
+                        class="btn btn-sm btn-success"
+                        data-bs-toggle="modal"
+                        data-bs-target="#confirmModal"
+                        data-action="/horarios/ativar/<%= h.id %>"
+                        data-message="Deseja ativar este horário &quot;<%= h.descricao %>&quot;?">
+                 <i class="bi bi-database-check"></i> Ativar
+                </button>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } else { %>
+  <div class="alert alert-warning">Nenhum horário cadastrado.</div>
+<% } %>
+
+<!-- Modal de Confirmação (apenas 1 para a página toda) -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title" id="confirmModalLabel">Confirmação</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body" id="confirmMessage">
+        <!-- mensagem dinâmica -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form id="confirmForm" method="POST">
+          <button type="submit" class="btn btn-danger">Confirmar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmMessage = document.getElementById('confirmMessage');
+  const confirmForm = document.getElementById('confirmForm');
+
+  confirmModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const action = button.getAttribute('data-action');
+    const message = button.getAttribute('data-message');
+
+    confirmMessage.innerHTML = message || 'Confirmar ação?';
+    confirmForm.setAttribute('action', action || '#');
+  });
+});
+</script>
+
+<%- include('partials/footer') %>

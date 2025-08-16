@@ -1,0 +1,54 @@
+<%- include('partials/header') %>
+
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card shadow">
+      <div class="card-body">
+        <h3 class="mb-4 text-center"><%= pagamento ? 'Editar Pagamento' : 'Cadastrar Pagamento' %></h3>
+
+        <form method="POST" action="<%= pagamento ? '/pagamentos/editar/' + pagamento.id : '/pagamentos/novo' %>" class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Funcionário</label>
+            <select name="funcionario_id" class="form-select" required>
+              <% funcionarios.forEach(f => { %>
+                <option value="<%= f.id %>" 
+                  <%= pagamento && String(pagamento.funcionario_id)===String(f.id) ? 'selected' : '' %>>
+                  <%= f.nome %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Competência</label>
+            <!-- type=month retorna "YYYY-MM" -->
+            <input type="month" name="competencia" class="form-control" required
+                   value="<%= pagamento ? pagamento.competencia_mes : '' %>">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Valor Pago (R$)</label>
+            <input type="text" name="valor_pago" class="form-control" required
+                   placeholder="Ex: 350,00"
+                   value="<%= pagamento ? Number(pagamento.valor_pago).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '' %>">
+            <div class="form-text">Use vírgula como separador decimal.</div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Observação</label>
+            <input type="text" name="obs" class="form-control" maxlength="255"
+                   value="<%= pagamento ? (pagamento.obs || '') : '' %>">
+          </div>
+
+          <div class="col-12 mt-2">
+            <button class="btn btn-success w-100"><%= pagamento ? 'Atualizar' : 'Cadastrar' %></button>
+            <a href="/pagamentos" class="btn btn-secondary w-100 mt-2">← Voltar</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

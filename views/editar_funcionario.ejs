@@ -1,16 +1,47 @@
-<!DOCTYPE html>
-<html>
-<head><title>Editar Funcionário</title></head>
-<body>
-  <h1>Editar Funcionário</h1>
-  <form method="POST" action="/funcionarios/editar/<%= funcionario.id %>">
-    <input name="nome" value="<%= funcionario.nome %>" placeholder="Nome" required><br>
-    <input name="email" value="<%= funcionario.email %>" placeholder="Email" required><br>
-    <input name="cargo" value="<%= funcionario.cargo %>" placeholder="Cargo" required><br>
-    <input name="jornada_base" value="<%= funcionario.jornada_base %>" placeholder="Jornada Base (horas)" required><br>
-    <input name="salario" value="<%= funcionario.salario %>" placeholder="Salário" required><br>
-    <button type="submit">Atualizar</button>
-  </form>
-  <a href="/funcionarios">Voltar</a>
-</body>
-</html>
+<%- include('partials/header') %>
+
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow">
+      <div class="card-body">
+        <h2 class="mb-4 text-center">Editar Funcionário</h2>
+
+        <form method="POST" action="/funcionarios/editar/<%= funcionario.id %>">
+          <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <input type="text" name="nome" id="nome" value="<%= funcionario.nome %>" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" name="email" id="email" value="<%= funcionario.email %>" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="cargo" class="form-label">Cargo</label>
+            <input type="text" name="cargo" id="cargo" value="<%= funcionario.cargo %>" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="jornada_base" class="form-label">Jornada Base (horas)</label>
+            <input type="number" name="jornada_base" id="jornada_base" value="<%= funcionario.jornada_base %>" class="form-control"  step="0.01"  required>
+          </div>
+
+          <div class="mb-4">
+            <label for="salario" class="form-label">Salário</label>
+            <input type="number" name="salario" id="salario" value="<%= funcionario.salario %>" class="form-control"  step="0.01"  required>
+          </div>
+
+          <button type="submit" class="btn btn-success w-100">Atualizar</button>
+        </form>
+
+        <div class="text-center mt-3">
+          <a href="/funcionarios" class="btn btn-secondary w-100">← Voltar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+

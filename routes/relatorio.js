@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
     const { id_funcionario, mes, ano } = req.query;
 
     if (!id_funcionario || !mes || !ano) {
-        return res.render('relatorio', { funcionarios, relatorio: [], resumo: null, filtros: null });
+        return res.render('relatorio', { funcionarios, relatorio: [], resumo: null, filtros: null, title: null });
     }
 
     const mesFormatado = String(mes).padStart(2, '0');
@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
 
     const { relatorio, resumo } = gerarRelatorioCompleto(dataInicio, dataFim, jornadasDb, funcionario, diasUteisDb);
 
-    res.render('relatorio', { funcionarios, relatorio, resumo, filtros: { id_funcionario, mes, ano } });
+    res.render('relatorio', { funcionarios, relatorio, resumo, filtros: { id_funcionario, mes, ano }, title });
 });
 
 router.get('/pdf', gerarPDF);

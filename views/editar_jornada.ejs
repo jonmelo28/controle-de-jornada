@@ -1,23 +1,44 @@
-<!DOCTYPE html>
-<html>
-<head><title>Editar Jornada</title></head>
-<body>
-  <h1>Editar Jornada - <%= jornada.nome_funcionario %></h1>
-  <form method="POST" action="/jornada/editar/<%= jornada.id %>">
-    <label>Entrada:</label>
-    <input type="time" name="entrada" value="<%= jornada.entrada %>" required><br>
+<%- include('partials/header') %>
 
-    <label>Saída Intervalo:</label>
-    <input type="time" name="saida_intervalo" value="<%= jornada.saida_intervalo %>"><br>
+<div class="row justify-content-center">
+  <div class="col-lg-6 col-xl-5">
+    <div class="card shadow">
+      <div class="card-body">
+        <h2 class="mb-1 text-center">Editar Jornada</h2>
+        <p class="text-center text-muted mb-4"><strong><%= jornada.nome_funcionario %></strong></p>
 
-    <label>Retorno Intervalo:</label>
-    <input type="time" name="retorno_intervalo" value="<%= jornada.retorno_intervalo %>"><br>
+        <form method="POST" action="/jornada/editar/<%= jornada.id %>" class="row g-3">
 
-    <label>Saída:</label>
-    <input type="time" name="saida" value="<%= jornada.saida %>" required><br>
+          <!-- Primeira linha: Entrada e Saída Intervalo -->
+          <div class="col-md-6">
+            <label for="entrada" class="form-label">Entrada 1º Turno</label>
+            <input type="time" id="entrada" name="entrada" class="form-control" value="<%= jornada.entrada %>" required>
+          </div>
+          <div class="col-md-6">
+            <label for="saida_intervalo" class="form-label">Saída 1º Turno</label>
+            <input type="time" id="saida_intervalo" name="saida_intervalo" class="form-control" value="<%= jornada.saida_intervalo %>">
+          </div>
 
-    <button type="submit">Salvar Alterações</button>
-  </form>
-  <a href="/jornada/relatorio">Voltar</a>
-</body>
-</html>
+          <!-- Segunda linha: Retorno Intervalo e Saída -->
+          <div class="col-md-6">
+            <label for="retorno_intervalo" class="form-label">Entrada 2º Turno</label>
+            <input type="time" id="retorno_intervalo" name="retorno_intervalo" class="form-control" value="<%= jornada.retorno_intervalo %>">
+          </div>
+          <div class="col-md-6">
+            <label for="saida" class="form-label">Saída 2º Turno</label>
+            <input type="time" id="saida" name="saida" class="form-control" value="<%= jornada.saida %>" required>
+          </div>
+
+          <!-- Botões -->
+          <div class="col-12 mt-3">
+            <button type="submit" class="btn btn-success w-100">Salvar Alterações</button>
+            <a href="/jornada/relatorio" class="btn btn-secondary w-100 mt-2">← Voltar</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

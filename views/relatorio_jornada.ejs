@@ -1,19 +1,130 @@
+<%- include('partials/header') %>
 
-<!DOCTYPE html>
-<html>
-<head><title>Relatório Jornada</title></head>
-<body>
-  <h1>Relatório Jornada</h1>
-  <a href="/jornada/registrar">nova jornada</a>
-  <ul>
-    <% jornadas.forEach(j => { %>
-      <li><%= j.data %> - <%= j.nome_funcionario%> - <%= j.entrada %> - <%= j.saida_intervalo %> - <%= j.retorno_intervalo %> - <%= j.saida %>
-      <a href="/jornada/editar/<%= j.id %>">Editar</a>
-      <form method="POST" action="/jornada/apagar/<%= j.id %>" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir?')">
-        <button type="submit">Apagar</button>
-      </form>
-      </li>
-    <% }) %>
-  </ul>
-</body>
-</html>
+<%
+  function fmtData(data) {
+    if (!data) return '-';
+    // tenta 'YYYY-MM-DD' ou 'YYYY-MM-DDTHH:mm:ss'
+    const m = String(data).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+
+    // se vier Date mesmo, use UTC para não deslocar
+    if (data instanceof Date) {
+      const d = String(data.getUTCDate()).padStart(2,'0');
+      const m2 = String(data.getUTCMonth()+1).padStart(2,'0');
+      const y = data.getUTCFullYear();
+      return `${d}/${m2}/${y}`;
+    }
+    return String(data);
+  }
+%>
+
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Jornadas</h2>
+  <a href="/jornada/registrar" class="btn btn-success"><i class="bi bi-database-add"></i> Nova Jornada</a>
+</div>
+
+<!-- Filtros -->
+<form method="GET" action="/jornada/relatorio" class="row g-3 mb-4">
+  <div class="col-md-4">
+    <label for="id_funcionario" class="form-label">Funcionário</label>
+    <select name="id_funcionario" id="id_funcionario" class="form-select">
+      <option value="">Todos</option>
+      <% if (typeof funcionarios !== 'undefined' && funcionarios?.length) { %>
+        <% funcionarios.forEach(f => { %>
+          <option value="<%= f.id %>" <%= (filtros && String(filtros.id_funcionario) === String(f.id)) ? 'selected' : '' %>>
+            <%= f.nome %>
+          </option>
+        <% }) %>
+      <% } %>
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <label for="data_inicio" class="form-label">De</label>
+    <input type="date" name="data_inicio" id="data_inicio" class="form-control"
+           value="<%= filtros && filtros.data_inicio ? filtros.data_inicio : '' %>">
+  </div>
+
+  <div class="col-md-3">
+    <label for="data_fim" class="form-label">Até</label>
+    <input type="date" name="data_fim" id="data_fim" class="form-control"
+           value="<%= filtros && filtros.data_fim ? filtros.data_fim : '' %>">
+  </div>
+
+  <div class="col-md-2 d-flex align-items-end gap-2">
+    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Filtrar</button>
+    <a href="/jornada/relatorio" class="btn btn-outline-secondary w-100"><i class="bi bi-recycle"></i> Limpar</a>
+  </div>
+</form>
+
+<% if (jornadas.length > 0) { %>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle text-center">
+      <thead class="table-dark">
+        <tr>
+          <th>Data</th>
+          <th>Funcionário</th>
+          <th>Entrada 1º Turno</th>
+          <th>Saída 1º Turno</th>
+          <th>Entrada 2º Turno</th>
+          <th>Saída 2º Turno</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% jornadas.forEach(j => { %>
+          <tr>
+            <td><%= fmtData(j.data) %></td>
+            <td><%= j.nome_funcionario %></td>
+            <td><%= j.entrada || '-' %></td>
+            <td><%= j.saida_intervalo || '-' %></td>
+            <td><%= j.retorno_intervalo || '-' %></td>
+            <td><%= j.saida || '-' %></td>
+            <td>
+              <a href="/jornada/editar/<%= j.id %>" class="btn btn-sm btn-primary me-2"><i class="bi bi-database-gear"></i> Editar</a>
+             <!-- Botão que abre o modal -->
+<button type="button" class="btn btn-sm btn-danger"
+        data-bs-toggle="modal"
+        data-bs-target="#confirmDeleteModal<%= j.id %>">
+ <i class="bi bi-database-x"></i> Apagar
+</button>
+
+<!-- Modal de confirmação -->
+<div class="modal fade" id="confirmDeleteModal<%= j.id %>" tabindex="-1" aria-labelledby="confirmDeleteModalLabel<%= j.id %>" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="confirmDeleteModalLabel<%= j.id %>">Confirmar Exclusão</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja excluir a jornada de  
+        <strong><%= j.nome_funcionario %></strong>  
+        no dia <strong><%= fmtData(j.data) %></strong>?
+        <br><span class="text-muted small">Essa ação não poderá ser desfeita.</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form action="/jornada/apagar/<%= j.id %>" method="POST" class="d-inline">
+          <button type="submit" class="btn btn-danger">Sim, excluir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } else { %>
+  <div class="alert alert-warning mt-4" role="alert">
+    Nenhuma jornada encontrada para os filtros informados.
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>
+
