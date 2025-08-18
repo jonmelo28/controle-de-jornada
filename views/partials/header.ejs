@@ -12,9 +12,10 @@
 
 </head>
 <body>
-
+  <% const hide = (typeof hideControls !== 'undefined' && hideControls); %>
+  
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 <%= hide ? 'd-none' : '' %>">
     <div class="container">
       <a class="navbar-brand" href="/"><img src="/images/logo15n.png" alt="Logo" width="50" height="50" class="me-2">Controle de Jornada</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

@@ -6,6 +6,9 @@ const { gerarRelatorioCompleto } = require('../utils/relatorio');
 const ExcelJS = require('exceljs');
 const dayjs = require('dayjs');
 const puppeteer = require('puppeteer');
+const ejs = require('ejs');
+const path = require('path');
+
 
 // Página de registro de jornada
 router.get('/registrar', async (req, res) => {
@@ -327,37 +330,67 @@ const resumoPairs = [
 });
 
 // ====== PDF (via Puppeteer “print” da página EJS) ======
+// ====== PDF (renderiza EJS em memória e imprime) ======
 router.get('/pdf', async (req, res) => {
   try {
     const { id_funcionario, data_inicio, data_fim } = req.query;
 
-    // Monte uma URL interna que renderiza sua EJS (modo "print")
-    const base = `${req.protocol}://${req.get('host')}`;
-    const url = `${base}/jornada/relatorio_avancado?id_funcionario=${id_funcionario}&data_inicio=${data_inicio}&data_fim=${data_fim}&print=1`;
+    // 1) Pegamos os mesmos dados do relatório
+    const { funcionario, relatorio, resumo } =
+      await getRelatorio(id_funcionario, data_inicio, data_fim);
 
+    // 2) Renderizamos a MESMA view EJS para string (modo print)
+    const viewPath = path.join(__dirname, '../views/relatorio_estilo_planilha.ejs');
+
+    // Dica: se você usa express-ejs-layouts, passe { layout: false }
+    const html = await ejs.renderFile(
+      viewPath,
+      {
+        funcionario,
+        data_inicio,
+        data_fim,
+        relatorio,
+        resumo,
+        funcionarios: [], // se a view esperar
+        filtros: { id_funcionario, data_inicio, data_fim },
+        print: true, // use isso na EJS para aplicar CSS de impressão
+        title:'',
+        hideControls: true, // vamos usar na view pra esconder filtros/botões
+      },
+      { async: false }
+    );
+
+    // 3) Gera o PDF a partir do HTML em memória
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox','--disable-setuid-sandbox']
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle0' });
 
-    // Forçar paisagem + fundo
+    // Importante: definir o conteúdo direto evita idas/voltas HTTP
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+     // ✅ faz @media print valer (esconde .no-print, aplica layout de impressão)
+    await page.emulateMediaType('print');
+
     const pdfBuffer = await page.pdf({
       format: 'A4',
       landscape: true,
       printBackground: true,
-      margin: { top:'10mm', right:'10mm', bottom:'10mm', left:'10mm' }
+      margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
     });
 
     await browser.close();
 
+    // 4) Envia o PDF correto
     const filename = `relatorio_${dayjs().format('YYYYMMDD_HHmm')}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(pdfBuffer);
+    res.end(pdfBuffer);
+
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao gerar PDF.');
+    console.error('Erro ao gerar PDF:', err);
+    // Se algo falhar, retorne 500 com texto (não PDF) para facilitar debug
+    res.status(500).send('Erro ao gerar PDF. Verifique o log do servidor.');
   }
 });
 

@@ -31,14 +31,40 @@
     }
   }
 %>
+<% const isPrint = (typeof print !== 'undefined') ? !!print : false; %>
+
+<style>
+  .wrap {
+    display: grid;
+    grid-template-columns: 1fr 320px; /* tabela | resumo */
+    gap: 16px;
+    align-items: start;
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+  th { background: #f4f4f4; }
+
+  @media print {
+    @page { size: A4 landscape; margin: 10mm; }
+    body { zoom: 0.90; } /* ajuste 0.80–0.95 se precisar caber */
+    .no-print { display: none !important; }
+  }
+</style>
+
+<% if (isPrint) { %>
+<style>
+  body { background: #fff; }
+</style>
+<% } %>
+
 
 <h1 class="mb-4">Relatório de Jornada</h1>
 
 <!-- Filtros -->
 <form method="GET" action="/jornada/relatorio_avancado" class="row g-3 mb-5">
   <div class="col-md-4">
-    <label for="id_funcionario" class="form-label">Funcionário:</label>
-    <select name="id_funcionario" id="id_funcionario" class="form-select" required>
+    <label for="id_funcionario" class="form-label no-print">Funcionário:</label>
+    <select name="id_funcionario" id="id_funcionario" class="form-select no-print" required>
       <option value="">Selecione</option>
       <% funcionarios.forEach(f => { %>
         <option value="<%= f.id %>" <%= filtros && filtros.id_funcionario == f.id ? 'selected' : '' %>><%= f.nome %></option>
@@ -47,24 +73,42 @@
   </div>
 
   <div class="col-md-3">
-    <label for="data_inicio" class="form-label">De:</label>
-    <input type="date" name="data_inicio" id="data_inicio" class="form-control" required value="<%= filtros ? filtros.data_inicio : '' %>">
+    <label for="data_inicio" class="form-label no-print">De:</label>
+    <input type="date" name="data_inicio" id="data_inicio" class="form-control no-print" required value="<%= filtros ? filtros.data_inicio : '' %>">
   </div>
 
   <div class="col-md-3">
-    <label for="data_fim" class="form-label">Até:</label>
-    <input type="date" name="data_fim" id="data_fim" class="form-control" required value="<%= filtros ? filtros.data_fim : '' %>">
+    <label for="data_fim" class="form-label no-print">Até:</label>
+    <input type="date" name="data_fim" id="data_fim" class="form-control no-print" required value="<%= filtros ? filtros.data_fim : '' %>">
   </div>
 
   <div class="col-md-2 d-flex align-items-end">
-    <button type="submit" class="btn btn-primary w-100">Gerar Relatório</button>
+    <button type="submit" class="btn btn-primary w-100 no-print">Gerar Relatório</button>
   </div>
 </form>
 
 <% if (relatorio.length > 0) { %>
 
   <h4 class="mb-3">Funcionário: <%= funcionario.nome %></h4>
-  <h5 class="mb-4">Período: <%= fmtData(data_inicio) %> até <%= fmtData(data_fim) %></h5>
+  <div class="d-flex gap-2 align-items-center flex-wrap mb-3" style="margin-bottom:12px; display:flex; gap:8px;">
+     <div class="me-auto mb-2 mb-sm-0">
+    <span class="fw-bold">Período:</span>
+    <%= fmtData(data_inicio) %> — <%= fmtData(data_fim) %>
+  </div>
+ <!-- <h5 class="mb-0">Período: <%= fmtData(data_inicio) %> até <%= fmtData(data_fim) %></h5>--> 
+    <!-- Botões de exportação -->
+      <div class="d-flex gap-2">
+  <a class="btn btn-sm btn-success no-print px-2 py-2 lh-1"
+     href="/jornada/excel?id_funcionario=<%= filtros.id_funcionario %>&data_inicio=<%= filtros.data_inicio %>&data_fim=<%= filtros.data_fim %>">
+    <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+  </a>
+
+  <a class="btn btn-sm btn-primary no-print px-2 py-2 lh-1"
+     href="/jornada/pdf?id_funcionario=<%= filtros.id_funcionario %>&data_inicio=<%= filtros.data_inicio %>&data_fim=<%= filtros.data_fim %>">
+    <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+  </a>
+  </div>
+</div>
 
   <!-- Tabela de Jornadas -->
   <div class="table-responsive mb-4">
@@ -120,18 +164,7 @@
     </tbody>
   </table>
 
-  <!-- Botões de exportação -->
-  <div class="no-print" style="margin-bottom:12px; display:flex; gap:8px;">
-  <a class="btn btn-sm btn-success"
-     href="/jornada/excel?id_funcionario=<%= filtros.id_funcionario %>&data_inicio=<%= filtros.data_inicio %>&data_fim=<%= filtros.data_fim %>">
-    Exportar Excel
-  </a>
 
-  <a class="btn btn-sm btn-primary"
-     href="/jornada/pdf?id_funcionario=<%= filtros.id_funcionario %>&data_inicio=<%= filtros.data_inicio %>&data_fim=<%= filtros.data_fim %>">
-    Exportar PDF
-  </a>
-</div>
 
 <% } else { %>
 
