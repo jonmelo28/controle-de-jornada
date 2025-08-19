@@ -1,0 +1,113 @@
+<%- include('partials/header', { title: 'Descontar' }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0">Marcação de Desconto (ausência → 8:00 restantes se não for sábado)</h5>
+</div>
+
+<form class="row g-2 mb-3" method="get" action="/descontar">
+  <div class="col-md-4">
+    <label class="form-label">Funcionário</label>
+    <select name="id_funcionario" class="form-select" required>
+      <option value="">Selecione...</option>
+      <% funcionarios.forEach(f => { %>
+        <option value="<%= f.id %>" <%= (filtros.id_funcionario == f.id ? 'selected' : '') %>><%= f.nome %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Início</label>
+    <input type="date" name="data_inicio" class="form-control" value="<%= filtros.data_inicio || '' %>" required>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Fim</label>
+    <input type="date" name="data_fim" class="form-control" value="<%= filtros.data_fim || '' %>" required>
+  </div>
+  <div class="col-md-2 d-flex align-items-end gap-2">
+    <button class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Filtrar</button>
+    <a href="/descontar" class="btn btn-outline-secondary w-100"><i class="bi bi-recycle"></i> Limpar</a>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-body">
+    <form class="row g-2" method="post" action="/descontar/salvar">
+  <div class="col-md-4">
+    <label class="form-label">Funcionário</label>
+    <select name="id_funcionario" class="form-select" required>
+      <option value="">Selecione...</option>
+      <% funcionarios.forEach(f => { %>
+        <option value="<%= f.id %>" <%= (filtros.id_funcionario == f.id ? 'selected' : '') %>><%= f.nome %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Data</label>
+    <input type="date" name="data" class="form-control" required>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Período</label>
+    <select name="periodo" class="form-select" required>
+      <option value="DIA">Dia inteiro</option>
+      <option value="P1">1º período</option>
+      <option value="P2">2º período</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Desconto</label>
+    <select name="desconto" class="form-select" required>
+      <option value="S">Sim</option>
+      <option value="N" selected>Não</option>
+    </select>
+  </div>
+  <div class="col-md-1 d-flex align-items-end">
+    <button class="btn btn-success w-100">Salvar</button>
+  </div>
+</form>
+  </div>
+</div>
+
+<hr>
+
+<table class="table table-sm table-bordered align-middle mt-3">
+  <thead class="table-light">
+    <tr>
+      <th style="width: 120px;">Data</th>
+      <th>Funcionário</th>
+      <th style="width: 120px;">Período</th>
+      <th style="width: 120px;">Desconto</th>
+      <th style="width: 120px;">Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (itens && itens.length) { %>
+      <% itens.forEach(r => { %>
+        <tr>
+          <td><%= r.data %></td>
+          <td><%= r.funcionario %></td>
+          <td>
+            <% if (r.periodo === 'DIA') { %>Dia inteiro<% } %>
+            <% if (r.periodo === 'P1') { %>1º período<% } %>
+            <% if (r.periodo === 'P2') { %>2º período<% } %>
+          </td>
+          <td>
+            <span class="badge <%= r.desconto === 'S' ? 'bg-danger' : 'bg-secondary' %>"><%= r.desconto %></span>
+          </td>
+          <td>
+            <form method="post" action="/descontar/remover/<%= r.id %>" class="d-inline">
+              <input type="hidden" name="id_funcionario" value="<%= filtros.id_funcionario || '' %>">
+              <input type="hidden" name="data_inicio" value="<%= filtros.data_inicio || '' %>">
+              <input type="hidden" name="data_fim" value="<%= filtros.data_fim || '' %>">
+              <button class="btn btn-outline-danger btn-sm">Remover</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    <% } else { %>
+      <tr><td colspan="5" class="text-center text-muted">Nenhum registro.</td></tr>
+    <% } %>
+  </tbody>
+</table>
+
+
+
+<% include('partials/header') %>

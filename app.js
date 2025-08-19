@@ -48,6 +48,9 @@ app.use('/relatorios', relatoriosRoutes);
 const relatorioSaldoRoutes = require('./routes/relatorio_saldo');
 app.use('/relatorio_saldo', relatorioSaldoRoutes);
 
+const descontarRoutes = require('./routes/descontar');
+app.use('/descontar', descontarRoutes);
+
 app.get('/', (req, res) => {
   res.redirect('/auth/login');
 });

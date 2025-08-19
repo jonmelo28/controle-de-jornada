@@ -85,10 +85,15 @@ function calcularHorasJornada(
 
 // ✅ Utilitários
 function fromDecimal(decimal) {
-    const totalMinutes = Math.round(decimal * 60);
+     if (decimal == null || isNaN(decimal)) return '0:00';
+
+     const neg = decimal < 0;
+    const totalMinutes = Math.round(Math.abs(decimal) * 60);
     const h = Math.floor(totalMinutes / 60);
     const m = totalMinutes % 60;
-    return `${h}:${m.toString().padStart(2, '0')}`;
+     if (m === 60) { h += 1; m   = 0; }
+      const mm = String(m).padStart(2, '0');
+  return `${neg ? '-' : ''}${h}:${mm}`;
 }
 
 function fromDecimalMin(decimal) {

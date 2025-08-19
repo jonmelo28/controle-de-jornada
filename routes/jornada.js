@@ -183,6 +183,18 @@ router.get('/relatorio_avancado', async (req, res) => {
       [id_funcionario, data_inicio, data_fim]
     );
 
+     // buscar “descontar”
+  const [descontarDb] = await db.query(
+  `SELECT 
+      DATE_FORMAT(data, "%Y-%m-%d") AS data,
+      TRIM(UPPER(periodo))  AS periodo,   -- 'DIA' | 'P1' | 'P2'
+      TRIM(UPPER(desconto)) AS desconto   -- 'S' | 'N'
+   FROM descontar
+   WHERE id_funcionario = ? AND data BETWEEN ? AND ?
+   ORDER BY data ASC`,
+    [id_funcionario, data_inicio, data_fim]
+  );
+
     // chama o gerador (ele monta o array completo por TODOS os dias)
     const { relatorio, resumo } = gerarRelatorioCompleto(
       formatDataSeguro(data_inicio),
@@ -190,7 +202,8 @@ router.get('/relatorio_avancado', async (req, res) => {
       jornadasDb,     // jornadas cruas
       funcionario,    // usa salario, jornada_base etc.
       diasUteisDb,    // contem { data: 'YYYY-MM-DD', eh_util: 'S'/'N' }
-      folgasDb        // contem { data: 'YYYY-MM-DD', folga_primeiro_periodo, folga_segundo_periodo }
+      folgasDb ,      // contem { data: 'YYYY-MM-DD', folga_primeiro_periodo, folga_segundo_periodo }
+      descontarDb       
     );
 
     // render

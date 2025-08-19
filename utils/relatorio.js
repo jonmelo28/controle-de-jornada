@@ -3,7 +3,7 @@ const db = require('../models/db');
 
 const { calcularHorasJornada, fromDecimal, toDecimal } = require('./calculos');
 
-function gerarRelatorioCompleto(data_inicio, data_fim, jornadasDb, funcionario, diasUteisDb, folgasDb) {
+function gerarRelatorioCompleto(data_inicio, data_fim, jornadasDb, funcionario, diasUteisDb, folgasDb, descontarDb) {
   // Helpers de data
   const parseDate = (dateStr) => {
     const [yyyy, mm, dd] = String(dateStr).split('-').map(Number);
@@ -39,6 +39,26 @@ function gerarRelatorioCompleto(data_inicio, data_fim, jornadasDb, funcionario, 
     folgasMap[dataFormatada].primeiro = folgasMap[dataFormatada].primeiro || (f.folga_primeiro_periodo === 'S');
     folgasMap[dataFormatada].segundo  = folgasMap[dataFormatada].segundo  || (f.folga_segundo_periodo  === 'S');
   });
+
+   // helper para normalizar o período
+function normalizePeriodo(raw) {
+  const s = String(raw || '').trim().toUpperCase();
+  if (s === 'P1' || s === '1' || s === 'PRIMEIRO' || s === 'PRIMEIRO_PERIODO' || s === 'PRIMEIRO PERIODO') return 'P1';
+  if (s === 'P2' || s === '2' || s === 'SEGUNDO'  || s === 'SEGUNDO_PERIODO'  || s === 'SEGUNDO PERIODO')  return 'P2';
+  if (s === 'DIA' || s === 'D' || s === 'ALL' || s === 'FULL') return 'DIA';
+  return null; // não assume DIA por padrão
+}
+
+// Map de "descontar" por período (DIA/P1/P2)
+const descontarMap = Object.create(null);
+for (const r of (descontarDb || [])) {
+  const dataFmt = (typeof r.data === 'string') ? r.data : formatDateToYMD(new Date(r.data));
+  const per = normalizePeriodo(r.periodo);
+  const ok  = String(r.desconto || 'N').trim().toUpperCase() === 'S';
+  if (!per || !ok) continue; // ignora inválidos e 'N'
+  if (!descontarMap[dataFmt]) descontarMap[dataFmt] = { DIA:false, P1:false, P2:false };
+  descontarMap[dataFmt][per] = true;
+}
 
   // Index de jornadas por data (se houver mais de uma no dia, a última prevalece)
   const index = {};
@@ -112,23 +132,53 @@ function gerarRelatorioCompleto(data_inicio, data_fim, jornadasDb, funcionario, 
         folga_primeiro_periodo: folgaPrimeiro,
         folga_segundo_periodo:  folgaSegundo
       });
+} else {
+  // === SEM JORNADA ===
+  const diaEhSabado = (d.getDay() === 6);  // 0=Dom, 6=Sáb
+  const folgaP1 = (folgasMap[dataStr]?.primeiro === 'S');
+  const folgaP2 = (folgasMap[dataStr]?.segundo  === 'S');
+
+  const marc = descontarMap[dataStr] || { DIA:false, P1:false, P2:false };
+  const hasMarcacao = marc.DIA || marc.P1 || marc.P2;
+  // limite do dia
+  const fullDay = diaEhSabado ? 4 : 8;
+
+  let alvoHoras = 0;
+  if (hasMarcacao) {
+    if (marc.DIA) {
+      alvoHoras = fullDay;
     } else {
-      // Sem jornada, mas ainda assim mostrar a folga marcada no dia
-      relatorio.push({
-        data: dataStr,
-        dia: diaSemana,
-        entrada: null,
-        saida_intervalo: null,
-        retorno_intervalo: null,
-        saida: null,
-        horas_trabalhadas: fromDecimal(0),
-        horas_extras: fromDecimal(0),
-        horas_restantes: fromDecimal(0),
-        folga_primeiro_periodo: folgaPrimeiro,
-        folga_segundo_periodo:  folgaSegundo
-      });
+      if (marc.P1 && !folgaP1) alvoHoras += 4;
+      if (marc.P2 && !folgaP2) alvoHoras += 4;
+      if (alvoHoras > fullDay) alvoHoras = fullDay;
     }
   }
+
+  totalTrabalhadas += 0;
+  totalExtras      += 0;
+  totalRestantes   += alvoHoras;
+
+  relatorio.push({
+    data: dataStr,
+    dia: diaSemana,
+    entrada: null,
+    saida_intervalo: null,
+    retorno_intervalo: null,
+    saida: null,
+    horas_trabalhadas: fromDecimal(0),
+    horas_extras: fromDecimal(0),
+    horas_restantes: fromDecimal(alvoHoras),
+    folga_primeiro_periodo: folgaP1 ? 'S' : 'N',
+    folga_segundo_periodo:  folgaP2 ? 'S' : 'N'
+  });
+
+  // DEBUG (descomente p/ ver)
+  // console.log('DESCONTO', dataStr, { marc, folgaP1, folgaP2, diaEhSabado, alvoHoras });
+}
+
+
+
+}
 
   // Cálculos financeiros
   const salarioBase = parseFloat(funcionario.salario || 0);
@@ -212,13 +262,25 @@ async function getRelatorio(id_funcionario, data_inicio, data_fim) {
     [id_funcionario, di, df]
   );
 
+  const [descontarDb] = await db.query(
+  `SELECT 
+      DATE_FORMAT(data, "%Y-%m-%d") AS data,
+      TRIM(UPPER(periodo))  AS periodo,   -- 'DIA' | 'P1' | 'P2'
+      TRIM(UPPER(desconto)) AS desconto   -- 'S' | 'N'
+   FROM descontar
+   WHERE id_funcionario = ? AND data BETWEEN ? AND ?
+   ORDER BY data ASC`,
+  [id_funcionario, di, df]
+);
+
   const { relatorio, resumo } = gerarRelatorioCompleto(
     di, 
     df, 
     jornadasDb, 
     funcionario, 
     diasUteisDb, 
-    folgasDb
+    folgasDb,
+    descontarDb
   );
 
   return { funcionario, relatorio, resumo };
