@@ -35,7 +35,8 @@ router.get('/', async (req, res) => {
     title: 'Descontar',
     funcionarios: funcs,
     itens: rows,
-    filtros: { id_funcionario, data_inicio, data_fim }
+    filtros: { id_funcionario, data_inicio, data_fim },
+    title: 'Descontar' 
   });
 });
 
@@ -48,7 +49,7 @@ router.post('/salvar', async (req, res) => {
      ON DUPLICATE KEY UPDATE desconto = VALUES(desconto)`,
     [id_funcionario, data, (periodo || 'DIA'), (desconto === 'S' ? 'S' : 'N')]
   );
-  res.redirect(`/descontar`);
+  res.redirect('/descontar', { title: 'Descontar' });
 });
 
 // REMOVER
@@ -56,7 +57,7 @@ router.post('/remover/:id', async (req, res) => {
   const { id } = req.params;
   const { id_funcionario, data_inicio, data_fim } = req.body;
   await db.query('DELETE FROM descontar WHERE id = ?', [id]);
-  res.redirect(`/descontar`);
+  res.redirect('/descontar', { title: 'Descontar' });
 });
 
 module.exports = router;

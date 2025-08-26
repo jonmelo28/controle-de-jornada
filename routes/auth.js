@@ -31,7 +31,7 @@ router.post('/login', async (req, res) => {
     req.session.userNivel = user.nivel;
 
     // Redirecionar para a dashboard ou página principal
-    res.redirect('/jornada/relatorio_avancado'); // ou outra página que preferir
+    res.redirect('/auth/home'); // ou outra página que preferir
   } catch (error) {
     console.error(error);
     res.send('Erro interno.');
@@ -67,6 +67,11 @@ router.post('/cadastro', async (req, res) => {
     console.error(error);
     res.send('Erro ao cadastrar usuário.');
   }
+});
+
+
+router.get('/home', (req, res) => {
+  res.render('home', { title: 'Home - JM Systems' });
 });
 
 module.exports = router;
