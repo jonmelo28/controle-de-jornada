@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
+const { requireAuth } = require('../middleware/auth'); 
 
 // Listar folgas
-router.get('/listar', async (req, res) => {
+router.get('/listar', requireAuth, async (req, res) => {
   const [folgas] = await db.query(`
     SELECT f.*, func.nome AS nome_funcionario
     FROM folgas f
@@ -15,13 +16,13 @@ router.get('/listar', async (req, res) => {
 });
 
 // Página de cadastro
-router.get('/cadastrar', async (req, res) => {
+router.get('/cadastrar', requireAuth, async (req, res) => {
   const [funcionarios] = await db.query('SELECT * FROM funcionarios WHERE status = 1');
   res.render('gerenciar_folgas', { folga: null, funcionarios, title:"Folga"});
 });
 
 // Cadastro
-router.post('/cadastrar', async (req, res) => {
+router.post('/cadastrar', requireAuth, async (req, res) => {
   const { id_funcionario, data } = req.body;
   const folga_primeiro_periodo = req.body.folga_primeiro_periodo ? 'S' : null;
   const folga_segundo_periodo = req.body.folga_segundo_periodo ? 'S' : null;
@@ -35,7 +36,7 @@ router.post('/cadastrar', async (req, res) => {
 });
 
 // Página de edição
-router.get('/editar/:id', async (req, res) => {
+router.get('/editar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
 
   const [folgas] = await db.query('SELECT * FROM folgas WHERE id = ?', [id]);
@@ -47,7 +48,7 @@ router.get('/editar/:id', async (req, res) => {
 });
 
 // Edição
-router.post('/editar/:id', async (req, res) => {
+router.post('/editar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const { id_funcionario, data } = req.body;
 
@@ -63,7 +64,7 @@ router.post('/editar/:id', async (req, res) => {
 });
 
 // Excluir
-router.post('/excluir/:id', async (req, res) => {
+router.post('/excluir/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   await db.query('DELETE FROM folgas WHERE id = ?', [id]);
   res.redirect('/folgas/listar');

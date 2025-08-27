@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db'); // mysql2/promise pool com dateStrings:true
+const { requireAuth } = require('../middleware/auth'); 
 
 // util
 const toBR = n => Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
@@ -197,7 +198,7 @@ const data = rows.map(r => {
 }
 
 // AJUDANTES
-router.get('/ajudantes', async (req, res) => {
+router.get('/ajudantes', requireAuth, async (req, res) => {
   const { data_inicio, data_fim } = req.query;
   if (!data_inicio || !data_fim) {
     return res.render('resumo_cargo_filtro', { title: 'Ajudantes', cargo: 'ajudante' });
@@ -213,7 +214,7 @@ router.get('/ajudantes', async (req, res) => {
 });
 
 // MOTORISTAS
-router.get('/motoristas', async (req, res) => {
+router.get('/motoristas', requireAuth, async (req, res) => {
   const { data_inicio, data_fim } = req.query;
   if (!data_inicio || !data_fim) {
     return res.render('resumo_cargo_filtro', { title: 'Motoristas', cargo: 'motorista' });

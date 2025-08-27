@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db'); // mysql2/promise com dateStrings:true
+const { requireAuth } = require('../middleware/auth'); 
 
 // util
 function toCompetenciaPrimeiroDia(yyyyMm) {
@@ -11,7 +12,7 @@ function toCompetenciaPrimeiroDia(yyyyMm) {
 }
 
 // LISTAR + FILTROS
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   const { id_funcionario, data_inicio, data_fim } = req.query;
 
   // Normaliza: cria datas de competência (primeiro dia do mês)
@@ -52,7 +53,7 @@ router.get('/', async (req, res) => {
 });
 
 // FORM NOVO
-router.get('/novo', async (req, res) => {
+router.get('/novo', requireAuth, async (req, res) => {
   const [funcionarios] = await db.query(
     'SELECT id, nome FROM funcionarios WHERE status = TRUE ORDER BY nome'
   );
@@ -60,7 +61,7 @@ router.get('/novo', async (req, res) => {
 });
 
 // CADASTRAR
-router.post('/novo', async (req, res) => {
+router.post('/novo', requireAuth, async (req, res) => {
   let { funcionario_id, competencia, valor_pago, obs } = req.body;
   const comp = toCompetenciaPrimeiroDia(competencia);     // "YYYY-MM-01"
   const valor = Number(String(valor_pago).replace(/\./g,'').replace(',', '.')) || 0;
@@ -73,7 +74,7 @@ router.post('/novo', async (req, res) => {
 });
 
 // FORM EDITAR
-router.get('/editar/:id', async (req, res) => {
+router.get('/editar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const [[pag]] = await db.query(
     `SELECT id, funcionario_id, DATE_FORMAT(competencia, '%Y-%m') AS competencia_mes,
@@ -94,7 +95,7 @@ router.get('/editar/:id', async (req, res) => {
 });
 
 // ATUALIZAR
-router.post('/editar/:id', async (req, res) => {
+router.post('/editar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   let { funcionario_id, competencia, valor_pago, obs } = req.body;
 
@@ -109,7 +110,7 @@ router.post('/editar/:id', async (req, res) => {
 });
 
 // EXCLUIR
-router.post('/excluir/:id', async (req, res) => {
+router.post('/excluir/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   await db.query('DELETE FROM pagamentos_extras WHERE id = ?', [id]);
   res.redirect('/pagamentos');

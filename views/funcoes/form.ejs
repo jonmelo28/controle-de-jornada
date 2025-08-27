@@ -1,0 +1,49 @@
+<%- include('../partials/header') %>
+<div class="container py-4" style="max-width: 920px;">
+  <h4><%= role ? 'Editar Função' : 'Nova Função' %></h4>
+
+  <% if (erro) { %><div class="alert alert-danger"><%= erro %></div><% } %>
+
+  <form method="post" action="<%= role ? '/funcoes/' + role.id + '/editar' : '/funcoes/novo' %>">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Nome</label>
+        <input class="form-control" name="nome" required value="<%= role ? role.nome : '' %>">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Descrição</label>
+        <input class="form-control" name="descricao" value="<%= role ? (role.descricao || '') : '' %>">
+      </div>
+    </div>
+
+    <% if (role) { %>
+      <hr class="my-4">
+      <h6>Permissões desta função</h6>
+      <div class="row">
+        <% if (permissoes && permissoes.length) { %>
+          <% permissoes.forEach(p => { %>
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="permissoes" value="<%= p.id %>"
+                  id="perm_<%= p.id %>"
+                  <%= selecionadas.has(p.id) ? 'checked' : '' %> >
+                <label class="form-check-label" for="perm_<%= p.id %>">
+                  <strong><%= p.chave %></strong><br>
+                  <small class="text-muted"><%= p.descricao || '' %></small>
+                </label>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="col-12"><em>Não há permissões cadastradas.</em></div>
+        <% } %>
+      </div>
+    <% } %>
+
+    <div class="mt-4 d-flex gap-2">
+      <button class="btn btn-primary" type="submit"><%= role ? 'Salvar' : 'Criar' %></button>
+      <a class="btn btn-light" href="/funcoes">Voltar</a>
+    </div>
+  </form>
+</div>
+<%- include('../partials/footer') %>

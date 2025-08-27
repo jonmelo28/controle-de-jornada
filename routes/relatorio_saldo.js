@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db'); // ajuste o caminho se necessário
+const { requireAuth } = require('../middleware/auth'); 
 
 // helper para primeiro e último dia do mês atual (ISO)
 function intervaloPadrao() {
@@ -120,7 +121,7 @@ async function saldoPorCargo(cargo, data_inicio, data_fim) {
   }));
 }
 
-router.get('/saldo-total', async (req, res) => {
+router.get('/saldo-total', requireAuth, async (req, res) => {
   const { data_inicio, data_fim } = req.query.data_inicio && req.query.data_fim
     ? { data_inicio: req.query.data_inicio, data_fim: req.query.data_fim }
     : intervaloPadrao();

@@ -1,20 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
+const { requireAuth } = require('../middleware/auth'); 
 
 // Listar todos os horários
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   const [horarios] = await db.query('SELECT * FROM horarios_padrao');
   res.render('horarios', { horarios, title:"horário" });
 });
 
 // Página de cadastro
-router.get('/novo', (req, res) => {
+router.get('/novo', requireAuth, async (req, res) => {
   res.render('cadastro_horario',{title:"Cadastrar Horário" });
 });
 
 // Cadastro
-router.post('/novo', async (req, res) => {
+router.post('/novo', requireAuth, async (req, res) => {
   const {descricao, dia_da_semana, entrada, saida_intervalo, retorno_intervalo, saida } = req.body;
 
   // Se for sábado, limpar intervalos
@@ -33,7 +34,7 @@ router.post('/novo', async (req, res) => {
 });
 
 // Página de edição
-router.get('/editar/:id', async (req, res) => {
+router.get('/editar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const [rows] = await db.query('SELECT * FROM horarios_padrao WHERE id = ?', [id]);
 
@@ -45,7 +46,7 @@ router.get('/editar/:id', async (req, res) => {
 });
 
 // Atualizar
-router.post('/editar/:id', async (req, res) => {
+router.post('/editar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const { descricao, dia_da_semana, entrada, saida_intervalo, retorno_intervalo, saida } = req.body;
 
@@ -65,14 +66,14 @@ router.post('/editar/:id', async (req, res) => {
 });
 
 // Inativar
-router.post('/inativar/:id', async (req, res) => {
+router.post('/inativar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   await db.query('UPDATE horarios_padrao SET status = FALSE WHERE id = ?', [id]);
   res.redirect('/horarios');
 });
 
 // Ativar
-router.post('/ativar/:id', async (req, res) => {
+router.post('/ativar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   await db.query('UPDATE horarios_padrao SET status = TRUE WHERE id = ?', [id]);
   res.redirect('/horarios');

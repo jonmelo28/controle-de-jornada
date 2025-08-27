@@ -4,6 +4,8 @@ const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const path = require('path');
+const { attachUserAndPerms } = require('./middleware/auth');
+const { can } = require('./middleware/view-helpers');
 
 const app = express();
 
@@ -17,6 +19,19 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+
+app.use(attachUserAndPerms);
+
+app.use((req, res, next) => {
+  res.locals.can = (perm) => can(req, perm);
+  next();
+});
+
+const funcoesRouter = require('./routes/funcoes');
+app.use('/funcoes', funcoesRouter);
+
+const permissoesRouter = require('./routes/permissoes');
+app.use('/permissoes', permissoesRouter);
 
 const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);

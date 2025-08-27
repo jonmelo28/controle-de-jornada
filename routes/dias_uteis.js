@@ -4,8 +4,9 @@ const router = express.Router();
 const db = require('../models/db');
 const { getDaysInMonth } = require('../utils/data');
 const { format } = require('date-fns');
+const { requireAuth } = require('../middleware/auth');
 
-router.get('/gerenciar', async (req, res) => {
+router.get('/gerenciar', requireAuth, async (req, res) => {
   const mes = parseInt(req.query.mes) || new Date().getMonth() + 1;
   const ano = parseInt(req.query.ano) || new Date().getFullYear();
 
@@ -43,7 +44,7 @@ const diasCompletos = diasDoMes.map(d => {
   res.render('gerenciar_dias_uteis', { mes, ano, dias: diasCompletos, title:"Dias uteis" });
 });
 
-router.post('/salvar', async (req, res) => {
+router.post('/salvar', requireAuth, async (req, res) => {
   const { mes, ano, dias_uteis = [] } = req.body;
   const diasSelecionados = Array.isArray(dias_uteis) ? dias_uteis : [dias_uteis];
 
@@ -64,7 +65,7 @@ router.post('/salvar', async (req, res) => {
   res.redirect(`/dias-uteis/gerenciar?mes=${mes}&ano=${ano}`);
 });
 
-router.post('/replicar', async (req, res) => {
+router.post('/replicar', requireAuth, async (req, res) => {
   const { mesOrigem, anoOrigem, mesDestino, anoDestino } = req.body;
   const diasOrigem = getDaysInMonth(parseInt(mesOrigem), parseInt(anoOrigem));
   const diasDestino = getDaysInMonth(parseInt(mesDestino), parseInt(anoDestino));

@@ -8,17 +8,18 @@ const dayjs = require('dayjs');
 const puppeteer = require('puppeteer');
 const ejs = require('ejs');
 const path = require('path');
+const { requireAuth } = require('../middleware/auth'); 
 
 
 // Página de registro de jornada
-router.get('/registrar', async (req, res) => {
+router.get('/registrar', requireAuth, async (req, res) => {
   const [funcionarios] = await db.query('SELECT * FROM funcionarios WHERE status = TRUE');
   res.render('registrar_jornada', { funcionarios ,
       title:'Registo de Jornada'});
 });
 
 // Registrar jornada
-router.post('/registrar', async (req, res) => {
+router.post('/registrar', requireAuth, async (req, res) => {
   const { id_funcionario, data, entrada, saida_intervalo, retorno_intervalo, saida } = req.body;
   await db.query(
     'INSERT INTO jornadas (id_funcionario, data, entrada, saida_intervalo, retorno_intervalo, saida) VALUES (?, ?, ?, ?, ?, ?)',
@@ -27,7 +28,7 @@ router.post('/registrar', async (req, res) => {
   res.redirect('/jornada/relatorio');
 });
 
-router.get('/relatorio', async (req, res) => {
+router.get('/relatorio', requireAuth, async (req, res) => {
   const { id_funcionario, data_inicio, data_fim } = req.query;
 
   // carrega funcionários para o filtro
@@ -61,7 +62,7 @@ router.get('/relatorio', async (req, res) => {
 
 
 // Página de edição de jornada
-router.get('/editar/:id', async (req, res) => {
+router.get('/editar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const [rows] = await db.query(`
     SELECT j.*, f.nome AS nome_funcionario
@@ -78,7 +79,7 @@ router.get('/editar/:id', async (req, res) => {
 });
 
 // Atualizar jornada
-router.post('/editar/:id', async (req, res) => {
+router.post('/editar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const { entrada, saida_intervalo, retorno_intervalo, saida } = req.body;
 
@@ -91,14 +92,14 @@ router.post('/editar/:id', async (req, res) => {
 });
 
 // Apagar jornada
-router.post('/apagar/:id', async (req, res) => {
+router.post('/apagar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   await db.query('DELETE FROM jornadas WHERE id = ?', [id]);
   res.redirect('/jornada/relatorio');
 });
 
 // Relatório avançado
-router.get('/relatorio_avancado', async (req, res) => {
+router.get('/relatorio_avancado', requireAuth, async (req, res) => {
   try {
     const { id_funcionario, data_inicio, data_fim } = req.query;
 
@@ -226,7 +227,7 @@ router.get('/relatorio_avancado', async (req, res) => {
 const { getRelatorio } = require('../utils/relatorio');
 
 // ====== EXCEL ======
-router.get('/excel', async (req, res) => {
+router.get('/excel', requireAuth, async (req, res) => {
   try {
     const { id_funcionario, data_inicio, data_fim } = req.query;
     const { funcionario, relatorio, resumo } = await getRelatorio(id_funcionario, data_inicio, data_fim);
@@ -344,7 +345,7 @@ const resumoPairs = [
 
 // ====== PDF (via Puppeteer “print” da página EJS) ======
 // ====== PDF (renderiza EJS em memória e imprime) ======
-router.get('/pdf', async (req, res) => {
+router.get('/pdf', requireAuth, async (req, res) => {
   try {
     const { id_funcionario, data_inicio, data_fim } = req.query;
 

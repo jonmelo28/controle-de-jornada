@@ -2,9 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
+const { requireAuth } = require('../middleware/auth'); 
 
 // Página de listagem
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   const [funcionarios] = await db.query('SELECT * FROM funcionarios');
   res.render('funcionarios', { 
     title: 'Lista de Funcionários', 
@@ -13,21 +14,21 @@ router.get('/', async (req, res) => {
 });
 
 // Página de cadastro
-router.get('/novo', (req, res) => {
+router.get('/novo', requireAuth, async (req, res) => {
   res.render('cadastro_funcionario', { 
     title: 'Cadastrar Funcionário' 
   });
 });
 
 // Cadastro
-router.post('/novo', async (req, res) => {
+router.post('/novo', requireAuth, async (req, res) => {
   const { nome, email, cargo, jornada_base, salario } = req.body;
   await db.query('INSERT INTO funcionarios (nome, email, cargo, jornada_base, salario) VALUES (?, ?, ?, ?, ?)', [nome, email, cargo, jornada_base, salario]);
   res.redirect('/funcionarios');
 });
 
 // Página de edição
-router.get('/editar/:id', async (req, res) => {
+router.get('/editar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const [rows] = await db.query('SELECT * FROM funcionarios WHERE id = ?', [id]);
 
@@ -42,7 +43,7 @@ router.get('/editar/:id', async (req, res) => {
 });
 
 // Atualizar funcionário
-router.post('/editar/:id', async (req, res) => {
+router.post('/editar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const { nome, email, cargo, jornada_base, salario } = req.body;
 
@@ -52,14 +53,14 @@ router.post('/editar/:id', async (req, res) => {
 });
 
 // Inativar funcionário
-router.post('/inativar/:id', async (req, res) => {
+router.post('/inativar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   await db.query('UPDATE funcionarios SET status = FALSE WHERE id = ?', [id]);
   res.redirect('/funcionarios');
 });
 
 // Ativar funcionário
-router.post('/ativar/:id', async (req, res) => {
+router.post('/ativar/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   await db.query('UPDATE funcionarios SET status = TRUE WHERE id = ?', [id]);
   res.redirect('/funcionarios');

@@ -2,9 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../models/db');
+const { requireAuth, requirePermission  } = require('../middleware/auth');
 
 // LISTAR (mostra todos se não filtrar)
-router.get('/', async (req, res) => {
+router.get('/', requireAuth,  async (req, res) => {
   const { id_funcionario, data_inicio, data_fim } = req.query;
 
   const [funcs] = await db.query(
@@ -41,7 +42,7 @@ router.get('/', async (req, res) => {
 });
 
 // UPSERT
-router.post('/salvar', async (req, res) => {
+router.post('/salvar', requireAuth, async (req, res) => {
   const { id_funcionario, data, periodo, desconto } = req.body; // periodo: DIA|P1|P2, desconto: S|N
   await db.query(
     `INSERT INTO descontar (id_funcionario, data, periodo, desconto)
@@ -53,7 +54,7 @@ router.post('/salvar', async (req, res) => {
 });
 
 // REMOVER
-router.post('/remover/:id', async (req, res) => {
+router.post('/remover/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const { id_funcionario, data_inicio, data_fim } = req.body;
   await db.query('DELETE FROM descontar WHERE id = ?', [id]);

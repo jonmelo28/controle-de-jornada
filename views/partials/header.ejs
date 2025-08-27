@@ -32,6 +32,11 @@
           <li class="nav-item"><a class="nav-link" href="/horarios">Horario</a></li>
           <li class="nav-item"><a class="nav-link" href="/pagamentos">Pagamento</a></li>
           <li class="nav-item"><a class="nav-link" href="/descontar">Desconto</a></li>
+          <% if (can('usuarios:gerir')) { %>
+           <li class="nav-item"><a class="nav-link" href="/funcoes">Funções</a></li>
+           <li class="nav-item"><a class="nav-link" href="/permissoes">Permissões</a></li>
+          <% } %>
+
           <li class="nav-item dropdown">
              <a class="nav-link dropdown-toggle <%= (typeof active !== 'undefined' && active === 'relatorios') ? 'active' : '' %>"
                               href="#" id="navRelatorios" role="button" data-bs-toggle="dropdown" aria-expanded="false">

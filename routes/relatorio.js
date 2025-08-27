@@ -8,8 +8,9 @@ const { gerarExcel } = require('../utils/exportExcel');
 const ExcelJS = require('exceljs');
 const dayjs = require('dayjs');
 const puppeteer = require('puppeteer');
+const { requireAuth } = require('../middleware/auth'); 
 
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
     const [funcionarios] = await db.query('SELECT * FROM funcionarios');
 
     const { id_funcionario, mes, ano } = req.query;
@@ -38,7 +39,7 @@ router.get('/', async (req, res) => {
     res.render('relatorio', { funcionarios, relatorio, resumo, filtros: { id_funcionario, mes, ano }, title });
 });
 
-router.get('/pdf', gerarPDF);
-router.get('/excel', gerarExcel);
+router.get('/pdf', requireAuth, gerarPDF);
+router.get('/excel', requireAuth, gerarExcel);
 
 module.exports = router;

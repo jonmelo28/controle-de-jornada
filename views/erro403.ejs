@@ -1,0 +1,9 @@
+<%- include('partials/header') %>
+<div class="container py-5">
+  <h3>403 • Acesso negado</h3>
+  <p>Você não tem permissão para acessar esta página.</p>
+  <% if (typeof requiredPerms !== 'undefined') { %>
+    <small>Permissões requeridas: <%= requiredPerms.join(', ') %></small>
+  <% } %>
+</div>
+<%- include('partials/footer') %>
